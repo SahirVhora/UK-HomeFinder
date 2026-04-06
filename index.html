@@ -480,7 +480,93 @@ function saveSettings(){
 // ═══════════════════════════════════════════════════════════
 // RIGHTMOVE / ZOOPLA URL PARSER
 // ═══════════════════════════════════════════════════════════
-function parseURL(){
+// Walk the string character-by-character to extract the first complete JSON object
+function extractJSON(str, offset){
+  let depth=0,inStr=false,esc=false;
+  for(let i=offset;i<str.length;i++){
+    const c=str[i];
+    if(esc){esc=false;continue;}
+    if(c==='\\'&&inStr){esc=true;continue;}
+    if(c==='"'){inStr=!inStr;continue;}
+    if(inStr)continue;
+    if(c==='{')depth++;
+    else if(c==='}'){depth--;if(depth===0)return str.slice(offset,i+1);}
+  }
+  return null;
+}
+
+async function fetchPropertyDetails(url, platform){
+  const PROXIES=[
+    u=>`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+    u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,
+  ];
+  let html='';
+  for(const makeProxy of PROXIES){
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),15000);
+    try{
+      const res=await fetch(makeProxy(url),{signal:ctrl.signal});
+      clearTimeout(tid);
+      if(!res.ok) continue;
+      const ct=res.headers.get('content-type')||'';
+      html=ct.includes('json')?(await res.json()).contents||'':(await res.text());
+      if(html.length>500) break;
+    }catch(e){clearTimeout(tid);}
+  }
+  if(!html) return null;
+
+  try{
+    if(platform==='Rightmove'){
+      const marker='window.PAGE_MODEL = ';
+      const idx=html.indexOf(marker);
+      if(idx>=0){
+        const raw=extractJSON(html, idx+marker.length);
+        if(raw){
+          const pd=JSON.parse(raw)?.propertyData||{};
+          return{
+            address: pd.address?.displayAddress||'',
+            price:   parseInt((pd.prices?.primaryPrice||'').replace(/[^0-9]/g,''))||0,
+            beds:    pd.bedrooms||0,
+            postcode:pd.address?.postcode||'',
+          };
+        }
+      }
+    }
+
+    if(platform==='Zoopla'){
+      const idx=html.indexOf('<script id="__NEXT_DATA__"');
+      if(idx>=0){
+        const start=html.indexOf('{',idx);
+        const raw=start>=0?extractJSON(html,start):null;
+        if(raw){
+          const nd=JSON.parse(raw);
+          const listing=nd?.props?.pageProps?.listingDetails||nd?.props?.pageProps?.data?.listing||{};
+          return{
+            address: listing.displayAddress||listing.address||'',
+            price:   parseInt((listing.price||listing.listingPrice||'').toString().replace(/[^0-9]/g,''))||0,
+            beds:    listing.numBedrooms??listing.bedsMax??0,
+            postcode:listing.postcode||'',
+          };
+        }
+      }
+    }
+  }catch(_){}
+
+  // Fallback: page title e.g. "3 bedroom semi-detached house for sale - Colebrook Road, Shirley | Rightmove"
+  const titleM=html.match(/<title>([^<]+)<\/title>/i);
+  const title=titleM?.[1]||'';
+  const bedsM=title.match(/(\d+)\s*bedroom/i);
+  const addrM=title.match(/ - (.+?)(?:\s*\|)/);
+  const priceM=html.match(/£([\d,]+)/);
+  return{
+    address: addrM?.[1]?.trim()||'',
+    price:   priceM?parseInt(priceM[1].replace(/,/g,''))||0:0,
+    beds:    bedsM?parseInt(bedsM[1]):0,
+    postcode:'',
+  };
+}
+
+async function parseURL(){
   const url=document.getElementById('rm-url').value.trim();
   const resultEl=document.getElementById('parse-result');
   resultEl.style.display='block';
@@ -489,52 +575,66 @@ function parseURL(){
 
   let propId=null,postcode=null,platform='Unknown';
 
-  // Rightmove: /properties/ID or /property-for-sale/property-ID/...
   const rmMatch=url.match(/rightmove\.co\.uk\/propert(?:y|ies)[^\/]*\/(?:property-)?(\d+)/i);
   if(rmMatch){platform='Rightmove';propId=rmMatch[1];}
 
-  // Zoopla: /for-sale/details/ID or /for-sale/property/slug
   const zpMatch=url.match(/zoopla\.co\.uk\/.+?\/details\/(\d+)/i);
   if(zpMatch){platform='Zoopla';propId=zpMatch[1];}
 
-  // Extract postcode from URL slug — works when URL contains address e.g. /b90-2qs.html or /solihull-b90-2qs/
-  // Pattern: optional prefix-AREA CODE (e.g. b90-2qs, sw1a-2aa, ec1a-1bb)
+  // Extract postcode from URL slug
   const pcSlug=url.match(/\b([a-z]{1,2}\d{1,2}[a-z]?)[_-](\d[a-z]{2})\b/i);
   if(pcSlug) postcode=(pcSlug[1]+' '+pcSlug[2]).toUpperCase();
-
-  // Fallback: standard postcode pattern with space (sometimes in query string)
   if(!postcode){
     const pcSpaced=url.match(/\b([A-Z]{1,2}\d{1,2}[A-Z]?)\s(\d[A-Z]{2})\b/i);
     if(pcSpaced) postcode=(pcSpaced[1]+' '+pcSpaced[2]).toUpperCase();
   }
 
+  document.getElementById('at-url').value=url;
+  document.getElementById('at-address').value='';
+  document.getElementById('at-price').value='';
+  document.getElementById('at-beds').value='';
+  document.getElementById('add-to-tracker-panel').style.display='block';
+
   let chips='';
   if(platform!=='Unknown') chips+=`<span class="parse-chip">📡 ${platform}</span>`;
   if(propId) chips+=`<span class="parse-chip">ID: ${propId}</span>`;
-  if(postcode) chips+=`<span class="parse-chip" style="background:var(--accent-bg);color:var(--accent)">📮 ${postcode} detected</span>`;
 
-  // Pre-fill add-to-tracker form always
-  document.getElementById('at-url').value=url;
-  document.getElementById('at-address').value='';
-  document.getElementById('add-to-tracker-panel').style.display='block';
+  // Fetch listing details if we have a known platform
+  let details=null;
+  if(platform!=='Unknown'&&propId){
+    resultEl.innerHTML=`<div style="margin-bottom:8px">${chips}</div>
+      <span class="loading-spinner" style="display:inline-block;margin-right:6px"></span>
+      <span style="font-size:13px;color:var(--text2)">Fetching listing details…</span>`;
+    details=await fetchPropertyDetails(url,platform);
+    if(details){
+      if(details.address) document.getElementById('at-address').value=details.address;
+      if(details.price)   document.getElementById('at-price').value=details.price;
+      if(details.beds)    document.getElementById('at-beds').value=details.beds;
+      if(details.postcode&&!postcode) postcode=details.postcode.toUpperCase();
+      updateAtSDLT();
+    }
+  }
+
+  if(postcode) chips+=`<span class="parse-chip" style="background:var(--accent-bg);color:var(--accent)">📮 ${postcode} detected</span>`;
+  if(details?.address) chips+=`<span class="parse-chip" style="background:var(--accent-bg);color:var(--accent)">🏠 ${details.address}</span>`;
+  if(details?.beds)    chips+=`<span class="parse-chip">🛏 ${details.beds} bed</span>`;
+  if(details?.price)   chips+=`<span class="parse-chip">💷 £${details.price.toLocaleString()}</span>`;
 
   if(postcode){
     document.getElementById('postcode-input').value=postcode;
     resultEl.innerHTML=`<div style="margin-bottom:8px">${chips}</div>
-      <div style="color:var(--accent);font-size:13px">✓ Postcode <strong>${postcode}</strong> found — running area intelligence…</div>`;
+      <div style="color:var(--accent);font-size:13px">✓ Postcode <strong>${postcode}</strong> found — running area intelligence…</div>
+      ${!details?'<div style="font-size:12px;color:var(--text3);margin-top:4px">Listing details unavailable — please fill address, price & beds manually.</div>':''}`;
     runAreaIntel(postcode);
   } else {
-    // No postcode in URL (common for /properties/ID share links) — show inline entry
     resultEl.innerHTML=`<div style="margin-bottom:10px">${chips}</div>
       <div style="font-size:13px;color:var(--text2);margin-bottom:8px">
-        ℹ Standard Rightmove share links don't include the postcode in the URL.
-        Enter it below to fetch schools &amp; transport data:
+        ℹ Enter the postcode to fetch schools &amp; transport data:
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="text" id="parser-inline-pc" placeholder="e.g. B90 2QS" style="max-width:160px;text-transform:uppercase;padding:7px 10px;font-size:14px;border:1px solid var(--border2);border-radius:6px;outline:none">
         <button class="btn btn-primary btn-sm" onclick="useInlinePostcode()">Look up area</button>
       </div>`;
-    // Focus the inline input
     setTimeout(()=>{
       const inp=document.getElementById('parser-inline-pc');
       if(inp){inp.focus();inp.addEventListener('keydown',e=>{if(e.key==='Enter')useInlinePostcode();});}
@@ -609,12 +709,24 @@ async function runAreaIntel(postcodeOverride){
     const tr=data.settings.trainRadius||1.5;
     const br=data.settings.busRadius||0.5;
 
-    // 2. Parallel: DfE schools + Overpass transport
+    // 2. Sequential: schools then transport — avoids hammering Overpass simultaneously
+    resultsEl.innerHTML=`<div class="alert alert-info" id="intel-status">Fetching schools…</div>`;
     const schoolTypeFilter=document.getElementById('school-type-filter')?.value||'all';
-    const[schools,transport]=await Promise.all([
-      fetchSchools(lat,lon,sr,schoolTypeFilter),
-      fetchTransport(lat,lon,tr,br)
-    ]);
+    let schools,transport;
+    try{
+      schools=await fetchSchools(lat,lon,sr,schoolTypeFilter);
+    }catch(schoolErr){
+      schools=[];
+      console.warn('Schools fetch failed:',schoolErr.message);
+    }
+    const statusEl=document.getElementById('intel-status');
+    if(statusEl)statusEl.textContent='Fetching transport…';
+    try{
+      transport=await fetchTransport(lat,lon,tr,br);
+    }catch(transportErr){
+      transport={stations:[],busstops:[]};
+      console.warn('Transport fetch failed:',transportErr.message);
+    }
 
     // 3. Compute intel scores
     const intel=computeIntelScore(schools,transport,postcode,lat,lon,district,region,sr,tr,br);
@@ -622,19 +734,55 @@ async function runAreaIntel(postcodeOverride){
 
     // 4. Render
     renderAreaIntel(intel,resultsEl,sr,tr,br);
+
+    // 5. Warn if partial data
+    if(schools.length===0&&transport.stations.length===0&&transport.busstops.length===0){
+      resultsEl.insertAdjacentHTML('afterbegin',
+        `<div class="alert alert-warn" style="margin-bottom:1rem">
+          ⚠ Overpass API returned no data — it may be temporarily overloaded.
+          <button class="btn btn-ghost btn-sm" style="margin-left:8px" onclick="runAreaIntel('${postcode}')">Retry</button>
+        </div>`);
+    } else if(schools.length===0){
+      resultsEl.insertAdjacentHTML('afterbegin',
+        `<div class="alert alert-warn" style="margin-bottom:1rem">⚠ Schools data unavailable (Overpass timeout). Transport data shown below. <button class="btn btn-ghost btn-sm" style="margin-left:8px" onclick="runAreaIntel('${postcode}')">Retry</button></div>`);
+    }
   }catch(e){
-    resultsEl.innerHTML=`<div class="alert alert-warn">${e.message||'Error fetching area data. Check postcode and try again.'}</div>`;
+    resultsEl.innerHTML=`<div class="alert alert-warn">
+      ⚠ ${e.message||'Error fetching area data. Check postcode and try again.'}
+      <button class="btn btn-ghost btn-sm" style="margin-left:8px" onclick="runAreaIntel('${postcode}')">Retry</button>
+    </div>`;
   }finally{
     loadingEl.style.display='none';
   }
 }
 
+async function overpassFetch(query, label){
+  const ENDPOINTS=[
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter',
+  ];
+  const body='data='+encodeURIComponent(query);
+  let lastErr;
+  for(const url of ENDPOINTS){
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),28000); // 28s client-side timeout
+    try{
+      const res=await fetch(url,{method:'POST',body,signal:ctrl.signal});
+      clearTimeout(tid);
+      if(!res.ok) throw new Error(`HTTP ${res.status} from Overpass (${label})`);
+      const json=await res.json();
+      return json;
+    }catch(e){
+      clearTimeout(tid);
+      lastErr=e.name==='AbortError'?new Error(`Overpass timed out (${label})`):e;
+    }
+  }
+  throw lastErr;
+}
+
 async function fetchSchools(lat,lon,radiusMiles,typeFilter){
   const radiusM=Math.round(radiusMiles*MILES_TO_METRES);
-  // Using Overpass API (OpenStreetMap) for schools — fully CORS-friendly, no key needed.
-  // OSM tags: amenity=school, isced:level (1=primary, 2=secondary, 3=sixth form)
-  // Also capture colleges and sixth forms (amenity=college)
-  const query=`[out:json][timeout:20];
+  const query=`[out:json][timeout:25];
 (
   node["amenity"="school"](around:${radiusM},${lat},${lon});
   way["amenity"="school"](around:${radiusM},${lat},${lon});
@@ -642,51 +790,36 @@ async function fetchSchools(lat,lon,radiusMiles,typeFilter){
   way["amenity"="college"](around:${radiusM},${lat},${lon});
 );
 out center tags;`;
-  try{
-    // Try primary Overpass endpoint, fall back to mirror
-    let res;
-    try{
-      res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(query)});
-    }catch(_){
-      res=await fetch('https://overpass.kumi.systems/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(query)});
-    }
-    if(!res.ok)throw new Error('Overpass schools error');
-    const json=await res.json();
-    let schools=(json.elements||[]).map(el=>{
-      const tags=el.tags||{};
-      const elLat=el.lat||(el.center?.lat)||lat;
-      const elLon=el.lon||(el.center?.lon)||lon;
-      const name=tags.name||tags['name:en']||'Unnamed school';
-      const isced=tags['isced:level']||'';
-      const typeTag=(tags['school:type']||tags.amenity||'').toLowerCase();
-      // Determine phase from OSM tags
-      let phase='School';
-      if(/college/.test(typeTag)||/3/.test(isced))phase='Sixth Form / College';
-      else if(/secondary|high|middle/.test(name.toLowerCase()+' '+typeTag)||/2/.test(isced))phase='Secondary';
-      else if(/primary|first|junior|infant|lower/.test(name.toLowerCase()+' '+typeTag)||/1/.test(isced))phase='Primary';
-      else if(/nursery|pre-school|early/.test(name.toLowerCase()+' '+typeTag)||/0/.test(isced))phase='Nursery';
-      const dist=haversine(lat,lon,elLat,elLon);
-      return{name,phase,lat:elLat,lon:elLon,dist,
-        website:tags.website||'',
-        operator:tags.operator||'',
-        postcode:tags['addr:postcode']||''};
-    });
-    // Deduplicate by name+approx location
-    const seen=new Set();
-    schools=schools.filter(s=>{const key=s.name.slice(0,15)+Math.round(s.lat*100);if(seen.has(key))return false;seen.add(key);return true;});
-    // Filter by type
-    if(typeFilter==='secondary')schools=schools.filter(s=>/Secondary|Sixth|College/.test(s.phase));
-    else if(typeFilter==='primary')schools=schools.filter(s=>/Primary|Nursery/.test(s.phase));
-    return schools.sort((a,b)=>a.dist-b.dist).slice(0,20);
-  }catch(e){
-    return[];
-  }
+  const json=await overpassFetch(query,'schools');
+  let schools=(json.elements||[]).map(el=>{
+    const tags=el.tags||{};
+    const elLat=el.lat||(el.center?.lat)||lat;
+    const elLon=el.lon||(el.center?.lon)||lon;
+    const name=tags.name||tags['name:en']||'Unnamed school';
+    const isced=tags['isced:level']||'';
+    const typeTag=(tags['school:type']||tags.amenity||'').toLowerCase();
+    let phase='School';
+    if(/college/.test(typeTag)||/3/.test(isced))phase='Sixth Form / College';
+    else if(/secondary|high|middle/.test(name.toLowerCase()+' '+typeTag)||/2/.test(isced))phase='Secondary';
+    else if(/primary|first|junior|infant|lower/.test(name.toLowerCase()+' '+typeTag)||/1/.test(isced))phase='Primary';
+    else if(/nursery|pre-school|early/.test(name.toLowerCase()+' '+typeTag)||/0/.test(isced))phase='Nursery';
+    const dist=haversine(lat,lon,elLat,elLon);
+    return{name,phase,lat:elLat,lon:elLon,dist,
+      website:tags.website||'',
+      operator:tags.operator||'',
+      postcode:tags['addr:postcode']||''};
+  });
+  const seen=new Set();
+  schools=schools.filter(s=>{const key=s.name.slice(0,15)+Math.round(s.lat*100);if(seen.has(key))return false;seen.add(key);return true;});
+  if(typeFilter==='secondary')schools=schools.filter(s=>/Secondary|Sixth|College/.test(s.phase));
+  else if(typeFilter==='primary')schools=schools.filter(s=>/Primary|Nursery/.test(s.phase));
+  return schools.sort((a,b)=>a.dist-b.dist).slice(0,20);
 }
 
 async function fetchTransport(lat,lon,trainRadiusMiles,busRadiusMiles){
   const trainM=Math.round(trainRadiusMiles*MILES_TO_METRES);
   const busM=Math.round(busRadiusMiles*MILES_TO_METRES);
-  const query=`[out:json][timeout:20];
+  const query=`[out:json][timeout:25];
 (
   node["railway"="station"](around:${trainM},${lat},${lon});
   node["railway"="halt"](around:${trainM},${lat},${lon});
@@ -695,34 +828,23 @@ async function fetchTransport(lat,lon,trainRadiusMiles,busRadiusMiles){
   node["public_transport"="platform"]["bus"="yes"](around:${busM},${lat},${lon});
 );
 out body;`;
-  try{
-    let res;
-    try{
-      res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(query)});
-    }catch(_){
-      res=await fetch('https://overpass.kumi.systems/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(query)});
+  const json=await overpassFetch(query,'transport');
+  const stations=[],busstops=[];
+  (json.elements||[]).forEach(el=>{
+    const tags=el.tags||{};
+    const dist=haversine(lat,lon,el.lat,el.lon);
+    const name=tags.name||tags['name:en']||'Unnamed';
+    if(tags.railway==='station'||tags.railway==='halt'){
+      if(!stations.find(s=>s.name===name))
+        stations.push({name,dist,lat:el.lat,lon:el.lon,operator:tags.operator||tags['network']||''});
+    } else if(tags.highway==='bus_stop'||tags.public_transport==='platform'){
+      busstops.push({name,dist,routes:tags.route_ref||tags.ref||tags['local_ref']||''});
     }
-    if(!res.ok)throw new Error('Overpass transport error');
-    const json=await res.json();
-    const stations=[],busstops=[];
-    (json.elements||[]).forEach(el=>{
-      const tags=el.tags||{};
-      const dist=haversine(lat,lon,el.lat,el.lon);
-      const name=tags.name||tags['name:en']||'Unnamed';
-      if(tags.railway==='station'||tags.railway==='halt'){
-        if(!stations.find(s=>s.name===name))
-          stations.push({name,dist,lat:el.lat,lon:el.lon,operator:tags.operator||tags['network']||''});
-      } else if(tags.highway==='bus_stop'||tags.public_transport==='platform'){
-        busstops.push({name,dist,routes:tags.route_ref||tags.ref||tags['local_ref']||''});
-      }
-    });
-    return{
-      stations:stations.sort((a,b)=>a.dist-b.dist).slice(0,6),
-      busstops:busstops.sort((a,b)=>a.dist-b.dist).slice(0,12),
-    };
-  }catch(e){
-    return{stations:[],busstops:[]};
-  }
+  });
+  return{
+    stations:stations.sort((a,b)=>a.dist-b.dist).slice(0,6),
+    busstops:busstops.sort((a,b)=>a.dist-b.dist).slice(0,12),
+  };
 }
 
 function haversine(lat1,lon1,lat2,lon2){
@@ -1085,7 +1207,11 @@ async function runIntelForProp(){
     const sr=data.settings.schoolRadius||2;
     const tr=data.settings.trainRadius||1.5;
     const br=data.settings.busRadius||0.5;
-    const[schools,transport]=await Promise.all([fetchSchools(lat,lon,sr,'all'),fetchTransport(lat,lon,tr,br)]);
+    el.innerHTML='<span style="font-size:13px;color:var(--text2)">Fetching schools…</span>';
+    let schools,transport;
+    try{ schools=await fetchSchools(lat,lon,sr,'all'); }catch(_){ schools=[]; }
+    el.innerHTML='<span style="font-size:13px;color:var(--text2)">Fetching transport…</span>';
+    try{ transport=await fetchTransport(lat,lon,tr,br); }catch(_){ transport={stations:[],busstops:[]}; }
     const intel=computeIntelScore(schools,transport,postcode,lat,lon,'','',sr,tr,br);
     lastIntelData=intel;
     // Auto-fill score sliders
@@ -1093,15 +1219,17 @@ async function runIntelForProp(){
     curScores.schools=intel.schoolScore;
     curScores.transport=intel.transportScore;
     initScoreSliders(curScores);
+    const partialWarn=intel.numSchools===0&&intel.numStations===0
+      ?`<div class="alert alert-warn" style="margin-top:6px">⚠ Overpass returned no data — scores may be inaccurate. <button class="btn btn-ghost btn-sm" onclick="runIntelForProp()">Retry</button></div>`:'';
     el.innerHTML=`<div class="alert alert-success">
-      Area score: <strong>${intel.areaScore}/10</strong> · 
-      ${intel.numSchools} schools (${sr}mi) · 
-      ${intel.numStations} train station${intel.numStations!==1?'s':''} · 
-      ${intel.numBuses} bus stops · 
+      Area score: <strong>${intel.areaScore}/10</strong> ·
+      ${intel.numSchools} schools (${sr}mi) ·
+      ${intel.numStations} train station${intel.numStations!==1?'s':''} ·
+      ${intel.numBuses} bus stops ·
       School score: ${intel.schoolScore}/10 · Transport: ${intel.transportScore}/10
-    </div>`;
+    </div>${partialWarn}`;
   }catch(e){
-    el.innerHTML=`<div class="alert alert-warn">${e.message}</div>`;
+    el.innerHTML=`<div class="alert alert-warn">⚠ ${e.message} <button class="btn btn-ghost btn-sm" onclick="runIntelForProp()">Retry</button></div>`;
   }finally{
     btn.disabled=false;spin.style.display='none';
   }
