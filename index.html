@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UK Home Finder Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f5f0;--surface:#fff;--surface2:#f0ede6;--border:#e2ddd4;--border2:#ccc8be;
+  --text:#1a1815;--text2:#6b6660;--text3:#9e9890;
+  --accent:#1a5c3a;--accent2:#2d7a52;--accent-bg:#eaf3ee;--accent-border:#b6d9c5;
+  --warn:#8a4a00;--warn-bg:#fef3e2;--warn-border:#f0c870;
+  --danger:#8b1c1c;--danger-bg:#fdf0f0;--danger-border:#f0b8b8;
+  --info:#1a3d6b;--info-bg:#edf4fd;--info-border:#b5d0ee;
+  --blue:#1751a8;--blue-bg:#eef4ff;--blue-border:#b8d0f5;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+header{background:var(--accent);color:#fff;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
+.logo{font-family:'DM Serif Display',serif;font-size:22px;letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
+.logo span{font-size:13px;font-family:'DM Sans',sans-serif;font-weight:300;opacity:.75;margin-left:4px}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;gap:0;overflow-x:auto}
+nav button{background:none;border:none;border-bottom:2px solid transparent;padding:14px 16px;font-size:14px;font-weight:500;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:color .15s,border-color .15s}
+nav button.active{color:var(--accent);border-bottom-color:var(--accent)}
+nav button:hover:not(.active){color:var(--text)}
+main{max-width:1120px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.section{display:none}.section.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;box-shadow:var(--shadow)}
+.card+.card{margin-top:1rem}
+.card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:1rem}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+@media(max-width:720px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}main{padding:1rem 1rem 3rem}header{padding:0 1rem}nav{padding:0 .5rem}}
+.stat-card{background:var(--surface2);border-radius:var(--radius-sm);padding:1rem 1.25rem;border:1px solid var(--border)}
+.stat-label{font-size:12px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.stat-value{font-size:26px;font-weight:600;color:var(--text);line-height:1.1}
+.stat-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.stat-card.green{background:var(--accent-bg);border-color:var(--accent-border)}.stat-card.green .stat-value{color:var(--accent)}
+.stat-card.warn{background:var(--warn-bg);border-color:var(--warn-border)}.stat-card.warn .stat-value{color:var(--warn)}
+.stat-card.danger{background:var(--danger-bg);border-color:var(--danger-border)}.stat-card.danger .stat-value{color:var(--danger)}
+.stat-card.info{background:var(--blue-bg);border-color:var(--blue-border)}.stat-card.info .stat-value{color:var(--blue)}
+label{font-size:13px;font-weight:500;color:var(--text2);display:block;margin-bottom:4px}
+input[type=text],input[type=number],input[type=url],select,textarea{width:100%;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent2)}
+textarea{resize:vertical;min-height:70px}
+.form-row{margin-bottom:1rem}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:1px solid;transition:all .15s;text-decoration:none}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:transparent;color:var(--text2);border-color:var(--border2)}.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+.btn-info{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)}.btn-info:hover{background:var(--blue-border)}
+.btn-danger{background:transparent;color:var(--danger);border-color:var(--danger-border)}.btn-danger:hover{background:var(--danger-bg)}
+.btn-sm{padding:5px 12px;font-size:13px}
+.progress-wrap{background:var(--border);border-radius:99px;height:8px;overflow:hidden}
+.progress-bar{height:100%;border-radius:99px;background:var(--accent);transition:width .4s ease}
+.progress-bar.warn{background:#d48b00}.progress-bar.danger{background:#c44}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:500}
+.badge-green{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border)}
+.badge-warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-border)}
+.badge-danger{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger-border)}
+.badge-info{background:var(--info-bg);color:var(--info);border:1px solid var(--info-border)}
+.badge-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.badge-gray{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.checklist-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.checklist-item:last-child{border-bottom:none}
+.checklist-item input[type=checkbox]{width:18px;height:18px;flex-shrink:0;cursor:pointer;accent-color:var(--accent);margin-top:2px}
+.checklist-item label{margin:0;font-size:14px;color:var(--text);font-weight:400;cursor:pointer}
+.checklist-item.done label{text-decoration:line-through;color:var(--text3)}
+.checklist-item .item-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:var(--radius);width:100%;max-width:660px;max-height:90vh;overflow-y:auto;padding:1.75rem;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(8px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:1.25rem}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border)}
+.tab-row{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.5rem}
+.tab-btn{background:none;border:none;border-bottom:2px solid transparent;padding:10px 14px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:-1px;transition:color .15s,border-color .15s}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.section-title{font-family:'DM Serif Display',serif;font-size:26px}
+.section-sub{font-size:14px;color:var(--text2);margin-top:2px}
+.sdlt-result{background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin-top:1rem}
+.sdlt-row{display:flex;justify-content:space-between;font-size:14px;padding:4px 0}
+.sdlt-total{font-weight:600;font-size:16px;border-top:1px solid var(--accent-border);margin-top:6px;padding-top:8px}
+.score-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.score-row-label{width:140px;font-size:13px;color:var(--text2);flex-shrink:0}
+.score-row .progress-wrap{flex:1;height:6px}
+.score-row-val{width:28px;font-size:13px;font-weight:500;text-align:right}
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--text3)}
+.empty-state p{margin-top:8px;font-size:14px}
+.alert{padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:1rem}
+.alert-info{background:var(--info-bg);border:1px solid var(--info-border);color:var(--info)}
+.alert-warn{background:var(--warn-bg);border:1px solid var(--warn-border);color:var(--warn)}
+.alert-success{background:var(--accent-bg);border:1px solid var(--accent-border);color:var(--accent)}
+.notes-box{background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;color:var(--text2);margin-top:8px;white-space:pre-wrap;word-break:break-word}
+.flex-row{display:flex;gap:8px;align-items:center}
+.flex-between{display:flex;justify-content:space-between;align-items:center}
+
+/* ── AREA INTEL ── */
+.intel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.intel-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start}
+.intel-body{padding:1.25rem 1.5rem}
+.intel-score-ring{width:72px;height:72px;position:relative;flex-shrink:0}
+.intel-score-ring svg{transform:rotate(-90deg)}
+.intel-score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700}
+.school-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.school-row:last-child{border-bottom:none}
+.school-name{font-size:14px;font-weight:500;flex:1}
+.school-meta{font-size:12px;color:var(--text2)}
+.school-dist{font-size:12px;color:var(--text3);white-space:nowrap}
+.transport-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+.transport-row:last-child{border-bottom:none}
+.transport-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.t-rail{background:#1751a8;color:#fff}
+.t-bus{background:#d48b00;color:#fff}
+.loading-spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:500}
+.pill-outstanding{background:#d4f5e2;color:#0a6640;border:1px solid #8ecfb0}
+.pill-good{background:#dceeff;color:#1751a8;border:1px solid #90bef0}
+.pill-ri{background:#fff0d4;color:#8a4a00;border:1px solid #f0c870}
+.pill-inadequate{background:#fde8e8;color:#8b1c1c;border:1px solid #f0b8b8}
+.pill-unknown{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+
+/* RIGHTMOVE PARSER */
+.parser-box{background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem}
+.parser-box .parser-title{font-size:14px;font-weight:600;color:var(--blue);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.parser-url-row{display:flex;gap:8px}
+.parser-url-row input{flex:1}
+.parse-result{margin-top:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:13px}
+.parse-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;background:var(--surface2);font-size:12px;margin:2px}
+
+/* settings modal */
+.settings-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.settings-row:last-child{border-bottom:none}
+.settings-label{flex:1;font-size:14px}
+.settings-sub{font-size:12px;color:var(--text3)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">UK Home Finder Hub <span>Schools · Transport · SDLT · Property Tracker</span></div>
+  <button class="btn btn-ghost btn-sm" onclick="openSettings()" style="color:#fff;border-color:rgba(255,255,255,.3)">⚙ Settings</button>
+</header>
+
+<nav>
+  <button class="active" onclick="showSection('overview')">Overview</button>
+  <button onclick="showSection('parser')">Rightmove Parser</button>
+  <button onclick="showSection('properties')">My Properties</button>
+  <button onclick="showSection('budget')">Budget & SDLT</button>
+  <button onclick="showSection('checklist')">Readiness</button>
+</nav>
+
+<main>
+
+<!-- ═══ OVERVIEW ═══ -->
+<div id="section-overview" class="section active">
+  <div class="section-header">
+    <div><div class="section-title">Home Search Dashboard</div><div class="section-sub" id="overview-sub">Your search at a glance</div></div>
+    <div id="overall-readiness-badge"></div>
+  </div>
+  <div class="grid-4" style="margin-bottom:1.25rem" id="overview-stats"></div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title">Readiness Progress</div><div id="readiness-progress-list"></div></div>
+    <div class="card"><div class="card-title">Top Properties</div><div id="overview-props-list"></div></div>
+  </div>
+  <div class="card" style="margin-top:1rem"><div class="card-title">Next Actions</div><div id="next-actions"></div></div>
+</div>
+
+<!-- ═══ RIGHTMOVE PARSER ═══ -->
+<div id="section-parser" class="section">
+  <div class="section-header">
+    <div><div class="section-title">Rightmove / Zoopla Parser</div><div class="section-sub">Paste a URL to extract property details + area intelligence</div></div>
+  </div>
+
+  <div class="parser-box">
+    <div class="parser-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="#1751a8" stroke-width="1.5"/><path d="M5 7h6M5 9.5h4" stroke="#1751a8" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Paste a Rightmove or Zoopla listing URL
+    </div>
+    <div class="parser-url-row">
+      <input type="url" id="rm-url" placeholder="https://www.rightmove.co.uk/properties/12345678 or https://www.zoopla.co.uk/for-sale/details/...">
+      <button class="btn btn-info" onclick="parseURL()">Parse</button>
+    </div>
+    <div style="font-size:12px;color:var(--blue);margin-top:8px;opacity:.8">
+      Extracts property ID, postcode from URL slug, then looks up schools &amp; transport around that postcode. If postcode can't be auto-detected, you'll be prompted to enter it.
+    </div>
+    <div id="parse-result" style="display:none" class="parse-result"></div>
+  </div>
+
+  <!-- MANUAL POSTCODE LOOKUP -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="card-title">Or — Enter Postcode Directly</div>
+    <div class="flex-row">
+      <input type="text" id="postcode-input" placeholder="e.g. B90 2QS or SW1A 1AA" style="max-width:200px;text-transform:uppercase">
+      <select id="school-type-filter" style="max-width:200px">
+        <option value="all">All school types</option>
+        <option value="secondary">Secondary only</option>
+        <option value="primary">Primary only</option>
+      </select>
+      <button class="btn btn-primary" onclick="runAreaIntel()">Analyse Area</button>
+      <span id="intel-loading" style="display:none"><span class="loading-spinner"></span> Fetching data…</span>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-top:6px">Searches schools within 2 miles · train stations within 1.5 miles · bus stops within 0.5 miles</div>
+  </div>
+
+  <!-- AREA INTEL RESULTS -->
+  <div id="area-intel-results"></div>
+
+  <!-- ADD TO TRACKER -->
+  <div id="add-to-tracker-panel" style="display:none" class="card">
+    <div class="card-title">Add This Property to Tracker</div>
+    <div class="form-row-2">
+      <div><label>Address</label><input type="text" id="at-address"></div>
+      <div><label>Price (£)</label><input type="number" id="at-price" oninput="updateAtSDLT()"></div>
+    </div>
+    <div class="form-row-2">
+      <div><label>Bedrooms</label><input type="number" id="at-beds"></div>
+      <div><label>Listing URL</label><input type="url" id="at-url"></div>
+    </div>
+    <div id="at-sdlt-preview"></div>
+    <div style="margin-top:1rem"><button class="btn btn-primary" onclick="addFromParser()">Add to Property Tracker</button></div>
+  </div>
+</div>
+
+<!-- ═══ PROPERTIES ═══ -->
+<div id="section-properties" class="section">
+  <div class="section-header">
+    <div><div class="section-title">My Properties</div><div class="section-sub">Track, score and compare every listing</div></div>
+    <button class="btn btn-primary" onclick="openAddProperty()">+ Add Property</button>
+  </div>
+  <div id="properties-list">
+    <div class="empty-state"><div style="font-size:36px">🏡</div><p>No properties tracked yet. Use the Rightmove Parser or add manually.</p></div>
+  </div>
+</div>
+
+<!-- ═══ BUDGET ═══ -->
+<div id="section-budget" class="section">
+  <div class="section-header"><div><div class="section-title">Budget & SDLT</div><div class="section-sub">Full purchase cost calculator</div></div></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Your Budget</div>
+      <div class="form-row"><label>First-time buyer?</label><select id="b-ftb" onchange="calcBudget()"><option value="1">Yes — first-time buyer</option><option value="0">No — previous owner</option></select></div>
+      <div class="form-row"><label>Deposit saved (£)</label><input type="number" id="b-deposit" placeholder="80000" oninput="calcBudget()"></div>
+      <div class="form-row"><label>Max property price (£)</label><input type="number" id="b-maxprice" placeholder="540000" oninput="calcBudget()"></div>
+      <div class="form-row"><label>Solicitor / conveyancing (£)</label><input type="number" id="b-solicitor" placeholder="2500" oninput="calcBudget()"></div>
+      <div class="form-row"><label>Survey budget (£)</label><input type="number" id="b-survey" placeholder="700" oninput="calcBudget()"></div>
+      <div class="form-row"><label>Removals & misc (£)</label><input type="number" id="b-removals" placeholder="1500" oninput="calcBudget()"></div>
+      <div class="form-row"><label>Priority school area <span style="font-weight:400;color:var(--text3)">(optional label)</span></label><input type="text" id="b-school-area" placeholder="e.g. Tudor Grange Academy catchment"></div>
+      <button class="btn btn-primary" onclick="saveBudget()">Save Budget</button>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-title">SDLT Quick Calculator</div>
+        <div class="alert alert-info" id="sdlt-rule-notice">April 2025: FTB gets 0% up to £300k · 5% on £300k–£500k · standard above £500k</div>
+        <div class="form-row"><label>Property price (£)</label><input type="number" id="sdlt-price" placeholder="480000" oninput="calcSDLT()"></div>
+        <div id="sdlt-result"></div>
+      </div>
+      <div class="card"><div class="card-title">Total Cost Summary</div><div id="budget-summary"><div class="empty-state"><p>Enter budget details to see totals</p></div></div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:1rem"><div class="card-title">SDLT Cliff Comparison</div><div id="sdlt-comparison"></div></div>
+</div>
+
+<!-- ═══ CHECKLIST ═══ -->
+<div id="section-checklist" class="section">
+  <div class="section-header">
+    <div><div class="section-title">Buying Readiness</div><div class="section-sub">Every step from AIP to completion</div></div>
+    <div id="checklist-summary-badge"></div>
+  </div>
+  <div class="card" style="margin-bottom:1.25rem">
+    <div class="flex-between" style="margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500">Overall progress</span>
+      <span style="font-size:14px;color:var(--text2)" id="checklist-pct-label">0 / 0</span>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="checklist-progress-bar" style="width:0%"></div></div>
+  </div>
+  <div id="checklist-sections"></div>
+</div>
+
+</main>
+
+<!-- ═══ PROPERTY MODAL ═══ -->
+<div class="modal-overlay" id="prop-modal">
+<div class="modal">
+  <div class="modal-title" id="prop-modal-title">Add Property</div>
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="switchPropTab('details',this)">Details</button>
+    <button class="tab-btn" onclick="switchPropTab('score',this)">Scoring</button>
+    <button class="tab-btn" onclick="switchPropTab('offer',this)">Offer</button>
+    <button class="tab-btn" onclick="switchPropTab('notes',this)">Viewing Notes</button>
+  </div>
+  <div id="ptab-details">
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0"><label>Address</label><input type="text" id="p-address" placeholder="Full address"></div>
+      <div class="form-row" style="margin-bottom:0"><label>Asking price (£)</label><input type="number" id="p-price" oninput="updatePropSDLT()"></div>
+    </div>
+    <div class="form-row-2" style="margin-top:1rem">
+      <div class="form-row" style="margin-bottom:0"><label>Postcode</label><input type="text" id="p-postcode" placeholder="e.g. B90 2QS" style="text-transform:uppercase"></div>
+      <div class="form-row" style="margin-bottom:0"><label>Bedrooms</label><input type="number" id="p-beds"></div>
+    </div>
+    <div class="form-row" style="margin-top:1rem"><label>Listing URL</label><input type="url" id="p-url"></div>
+    <div class="form-row"><label>Status</label>
+      <select id="p-status">
+        <option value="watching">Watching</option><option value="viewing-booked">Viewing Booked</option>
+        <option value="viewed">Viewed</option><option value="offer-pending">Offer Pending</option>
+        <option value="offer-accepted">Offer Accepted</option><option value="rejected">Rejected</option>
+      </select>
+    </div>
+    <div id="prop-sdlt-preview"></div>
+    <div style="margin-top:1rem">
+      <button class="btn btn-info btn-sm" id="p-run-intel-btn" onclick="runIntelForProp()">
+        <span class="loading-spinner" id="p-intel-spin" style="display:none"></span> Fetch Area Intelligence
+      </button>
+      <div id="p-intel-result" style="margin-top:10px"></div>
+    </div>
+  </div>
+  <div id="ptab-score" style="display:none">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Rate 0–10. School quality and transport now auto-filled from area data when available.</p>
+    <div id="score-sliders"></div>
+    <div class="sdlt-result" style="margin-top:1rem">
+      <div class="flex-between"><span style="font-size:14px;font-weight:600">Composite score</span><span style="font-size:22px;font-weight:700;color:var(--accent)" id="composite-score">0</span></div>
+      <div style="font-size:12px;color:var(--text2);margin-top:2px">School quality is double-weighted. Score ≥70 = strong candidate.</div>
+    </div>
+  </div>
+  <div id="ptab-offer" style="display:none">
+    <div class="form-row"><label>Planned offer (£)</label><input type="number" id="p-offer"></div>
+    <div class="form-row"><label>Max walk-away price (£)</label><input type="number" id="p-maxoffer"></div>
+    <div class="form-row"><label>Chain status</label>
+      <select id="p-chain"><option value="unknown">Unknown</option><option value="chain-free">Seller chain-free</option><option value="short">Short chain (1 below)</option><option value="long">Long chain (2+)</option></select>
+    </div>
+    <div class="form-row"><label>Offer rationale / negotiation notes</label><textarea id="p-offer-notes" placeholder="Chain-free FTB leverage, SDLT cliff analysis, comparable sales…"></textarea></div>
+  </div>
+  <div id="ptab-notes" style="display:none">
+    <div class="form-row"><label>Viewing date</label><input type="text" id="p-viewing-date" placeholder="e.g. Saturday 12 April 2026"></div>
+    <div class="form-row"><label>First impressions</label><textarea id="p-note-impression" placeholder="Kerb appeal, condition, neighbourhood feel…"></textarea></div>
+    <div class="form-row"><label>Damp / structural concerns</label><textarea id="p-note-damp" placeholder="Musty smell, peeling wallpaper, cracks, roof tiles…"></textarea></div>
+    <div class="form-row"><label>Garden, parking, broadband</label><textarea id="p-note-ext" placeholder="Garden aspect, size, parking, Ofcom speed…"></textarea></div>
+    <div class="form-row"><label>Gut feeling & next step</label><textarea id="p-note-gut" placeholder="Would you offer? What's holding you back?"></textarea></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closePropModal()">Cancel</button>
+    <button class="btn btn-danger btn-sm" id="delete-prop-btn" style="display:none" onclick="deleteProperty()">Delete</button>
+    <button class="btn btn-primary" onclick="saveProperty()">Save Property</button>
+  </div>
+</div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-modal">
+<div class="modal">
+  <div class="modal-title">Settings</div>
+  <div class="form-row"><label>Your name / search label</label><input type="text" id="s-name" placeholder="e.g. Sahir — Solihull Search 2026"></div>
+  <div class="form-row"><label>Target postcode area</label><input type="text" id="s-area" placeholder="e.g. B90, B91"></div>
+  <div class="form-row"><label>Priority school name <span style="font-weight:400;color:var(--text3)">(appears in scoring labels)</span></label><input type="text" id="s-school" placeholder="e.g. Tudor Grange Academy"></div>
+  <div class="form-row"><label>School search radius</label>
+    <select id="s-school-radius"><option value="2">2 miles (recommended)</option><option value="1">1 mile</option><option value="3">3 miles</option></select>
+  </div>
+  <div class="form-row"><label>Train station search radius</label>
+    <select id="s-train-radius"><option value="1.5">1.5 miles (recommended)</option><option value="1">1 mile</option><option value="2">2 miles</option></select>
+  </div>
+  <div class="form-row"><label>Bus stop search radius</label>
+    <select id="s-bus-radius"><option value="0.5">0.5 miles (recommended)</option><option value="0.3">0.3 miles</option><option value="0.75">0.75 miles</option></select>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA MODEL
+// ═══════════════════════════════════════════════════════════
+const SCORE_DIMS=[
+  {key:'schools',    label:'School quality',      weight:2},
+  {key:'transport',  label:'Transport links',      weight:1.5},
+  {key:'price',      label:'Value for money',      weight:1.5},
+  {key:'condition',  label:'Condition / no work',  weight:1},
+  {key:'size',       label:'Size & layout',        weight:1},
+  {key:'location',   label:'Location / commute',   weight:1},
+  {key:'garden',     label:'Garden & parking',     weight:0.75},
+  {key:'broadband',  label:'Broadband quality',    weight:0.5},
+];
+
+const CHECKLIST_SECTIONS=[
+  {title:'Financial Preparation',items:[
+    {id:'aip',text:'Get Mortgage in Principle (AIP)',meta:'Do before serious viewings — makes you a credible buyer'},
+    {id:'deposit',text:'Deposit saved and in accessible account',meta:'Lender will want evidence of source'},
+    {id:'payslips',text:'3 months payslips compiled'},
+    {id:'bankstat',text:'3 months bank statements prepared'},
+    {id:'advisor',text:'Reviewed options with mortgage advisor'},
+  ]},
+  {title:'School Research',items:[
+    {id:'schools-checked',text:'Identified Outstanding/Good schools near target postcodes',meta:'Use the Rightmove Parser area intelligence'},
+    {id:'council-call',text:'Called local council admissions team to verify catchment'},
+    {id:'school-timeline',text:'Confirmed school admission year timeline for your child'},
+  ]},
+  {title:'Legal & Solicitor',items:[
+    {id:'solicitor-shortlist',text:'Shortlisted 2–3 conveyancing solicitors',meta:'Proactive solicitor makes a huge difference'},
+    {id:'solicitor-instructed',text:'Solicitor pre-instructed (ready on acceptance)'},
+    {id:'id-docs',text:'ID documents compiled (passport, utility bills)',meta:'AML checks required by solicitor'},
+  ]},
+  {title:'Property Research',items:[
+    {id:'land-registry',text:'Land Registry sold prices checked on target streets'},
+    {id:'survey-type',text:'Decided on survey type (HomeBuyers vs Full Structural)'},
+    {id:'surveyor-quotes',text:'Got surveyor quotes',meta:'£500–£800 HomeBuyers; £900–£1,500 Full Structural'},
+    {id:'flood-check',text:'Flood risk checked (gov.uk flood map)'},
+    {id:'epc-check',text:'EPC rating checked (gov.uk energy certificate)'},
+  ]},
+  {title:'Offer & Completion',items:[
+    {id:'offer-strategy',text:'Offer strategy prepared',meta:'Lead with chain-free status; leverage SDLT cliff if near £300k or £500k'},
+    {id:'buildings-ins',text:'Buildings insurance quote obtained',meta:'Must be in place from exchange, not completion'},
+  ]},
+];
+
+let data=JSON.parse(localStorage.getItem('uk-home-hub')||'{}');
+if(!data.checklist)data.checklist={};
+if(!data.properties)data.properties=[];
+if(!data.budget)data.budget={ftb:1};
+if(!data.settings)data.settings={name:'',area:'',school:'',schoolRadius:2,trainRadius:1.5,busRadius:0.5};
+let editingPropIdx=-1;
+let lastIntelData=null;
+
+function save(){localStorage.setItem('uk-home-hub',JSON.stringify(data))}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  const labels={overview:'Overview',parser:'Rightmove',properties:'My Properties',budget:'Budget',checklist:'Readiness'};
+  [...document.querySelectorAll('nav button')].find(b=>b.textContent.trim()===labels[id])?.classList.add('active');
+  renderAll();
+}
+
+function renderAll(){
+  renderOverview();
+  renderChecklistSections();
+  renderPropertiesList();
+  restoreBudget();
+  renderSDLTComparison();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════════
+function openSettings(){
+  const s=data.settings;
+  document.getElementById('s-name').value=s.name||'';
+  document.getElementById('s-area').value=s.area||'';
+  document.getElementById('s-school').value=s.school||'';
+  document.getElementById('s-school-radius').value=s.schoolRadius||2;
+  document.getElementById('s-train-radius').value=s.trainRadius||1.5;
+  document.getElementById('s-bus-radius').value=s.busRadius||0.5;
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings(){document.getElementById('settings-modal').classList.remove('open')}
+function saveSettings(){
+  data.settings={
+    name:document.getElementById('s-name').value,
+    area:document.getElementById('s-area').value,
+    school:document.getElementById('s-school').value,
+    schoolRadius:parseFloat(document.getElementById('s-school-radius').value),
+    trainRadius:parseFloat(document.getElementById('s-train-radius').value),
+    busRadius:parseFloat(document.getElementById('s-bus-radius').value),
+  };
+  save();closeSettings();renderAll();
+}
+
+// ═══════════════════════════════════════════════════════════
+// RIGHTMOVE / ZOOPLA URL PARSER
+// ═══════════════════════════════════════════════════════════
+function parseURL(){
+  const url=document.getElementById('rm-url').value.trim();
+  const resultEl=document.getElementById('parse-result');
+  resultEl.style.display='block';
+
+  let propId=null,postcode=null,platform='Unknown',address=null;
+
+  // Rightmove: /properties/12345678
+  const rmMatch=url.match(/rightmove\.co\.uk\/properties?\/(\d+)/i);
+  if(rmMatch){platform='Rightmove';propId=rmMatch[1];}
+
+  // Zoopla: /for-sale/details/12345678 or slug with postcode
+  const zpMatch=url.match(/zoopla\.co\.uk\/.+?\/details\/(\d+)/i);
+  if(zpMatch){platform='Zoopla';propId=zpMatch[1];}
+
+  // Try extract postcode from URL slug (rightmove includes address slug)
+  const pcMatch=url.match(/([A-Z]{1,2}\d{1,2}[A-Z]?[-\s]\d[A-Z]{2})/i);
+  if(pcMatch)postcode=pcMatch[1].toUpperCase().replace('-',' ');
+
+  // Try extract from path segments like /sw1a-2aa or /b90-2qs
+  if(!postcode){
+    const slugMatch=url.match(/\/([a-z]{1,2}\d{1,2}[a-z]?-\d[a-z]{2})\//i);
+    if(slugMatch)postcode=slugMatch[1].replace('-',' ').toUpperCase();
+  }
+
+  // Try extract town/area from slug for display
+  const slugParts=url.split('/').filter(s=>s.length>3&&!/^\d+$/.test(s)&&!s.includes('.')).slice(-3);
+
+  let chips='';
+  if(platform!=='Unknown')chips+=`<span class="parse-chip">📡 ${platform}</span>`;
+  if(propId)chips+=`<span class="parse-chip">ID: ${propId}</span>`;
+  if(postcode)chips+=`<span class="parse-chip badge-green">📮 ${postcode}</span>`;
+
+  resultEl.innerHTML=`<div style="margin-bottom:8px">${chips||'<span style="color:var(--text3)">Could not auto-detect all fields</span>'}</div>`;
+
+  if(postcode){
+    // Pre-fill the add-to-tracker form
+    document.getElementById('at-url').value=url;
+    document.getElementById('at-address').value='';
+    document.getElementById('postcode-input').value=postcode;
+    document.getElementById('add-to-tracker-panel').style.display='block';
+    resultEl.innerHTML+=`<div style="color:var(--accent);font-size:13px">Postcode detected: <strong>${postcode}</strong> — running area intelligence…</div>`;
+    runAreaIntel(postcode);
+  } else {
+    resultEl.innerHTML+=`<div style="font-size:13px;color:var(--warn)">Could not auto-detect postcode from this URL. Enter it manually below.</div>`;
+    document.getElementById('at-url').value=url;
+    document.getElementById('add-to-tracker-panel').style.display='block';
+  }
+}
+
+function updateAtSDLT(){
+  const price=parseFloat(document.getElementById('at-price').value)||0;
+  const el=document.getElementById('at-sdlt-preview');
+  if(!price){el.innerHTML='';return;}
+  const ftb=data.budget.ftb!==0;
+  const {tax}=calcSDLTForAmount(price,ftb);
+  el.innerHTML=`<div class="alert alert-${price>500000?'warn':'success'}" style="margin-top:8px">SDLT: £${Math.round(tax).toLocaleString()}${price>500000&&ftb?' — above £500k, FTB relief does not apply':''}</div>`;
+}
+
+function addFromParser(){
+  const prop={
+    address:document.getElementById('at-address').value||'Property from Rightmove',
+    price:parseFloat(document.getElementById('at-price').value)||0,
+    beds:parseInt(document.getElementById('at-beds').value)||0,
+    postcode:document.getElementById('postcode-input').value.toUpperCase(),
+    url:document.getElementById('at-url').value,
+    status:'watching',
+    scores:{schools:5,transport:5,price:5,condition:5,size:5,location:5,garden:5,broadband:5},
+    intel:lastIntelData||null,
+    notes:{},
+  };
+  // Auto-fill scores from intel if available
+  if(lastIntelData){
+    prop.scores.schools=lastIntelData.schoolScore||5;
+    prop.scores.transport=lastIntelData.transportScore||5;
+  }
+  data.properties.push(prop);save();
+  showSection('properties');
+  alert('Property added to tracker!');
+}
+
+// ═══════════════════════════════════════════════════════════
+// AREA INTELLIGENCE ENGINE
+// ═══════════════════════════════════════════════════════════
+const MILES_TO_METRES=1609.34;
+
+async function runAreaIntel(postcodeOverride){
+  const postcode=(postcodeOverride||document.getElementById('postcode-input').value).trim().toUpperCase();
+  if(!postcode){alert('Please enter a postcode');return;}
+
+  const resultsEl=document.getElementById('area-intel-results');
+  const loadingEl=document.getElementById('intel-loading');
+  loadingEl.style.display='inline-flex';
+  resultsEl.innerHTML='';
+  lastIntelData=null;
+
+  try{
+    // 1. Postcode → lat/lon
+    const pcRes=await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(postcode)}`);
+    const pcData=await pcRes.json();
+    if(pcData.status!==200)throw new Error('Postcode not found: '+postcode);
+    const{latitude:lat,longitude:lon,admin_district:district,region}=pcData.result;
+
+    const sr=data.settings.schoolRadius||2;
+    const tr=data.settings.trainRadius||1.5;
+    const br=data.settings.busRadius||0.5;
+
+    // 2. Parallel: DfE schools + Overpass transport
+    const schoolTypeFilter=document.getElementById('school-type-filter')?.value||'all';
+    const[schools,transport]=await Promise.all([
+      fetchSchools(lat,lon,sr,schoolTypeFilter),
+      fetchTransport(lat,lon,tr,br)
+    ]);
+
+    // 3. Compute intel scores
+    const intel=computeIntelScore(schools,transport,postcode,lat,lon,district,region,sr,tr,br);
+    lastIntelData=intel;
+
+    // 4. Render
+    renderAreaIntel(intel,resultsEl,sr,tr,br);
+  }catch(e){
+    resultsEl.innerHTML=`<div class="alert alert-warn">${e.message||'Error fetching area data. Check postcode and try again.'}</div>`;
+  }finally{
+    loadingEl.style.display='none';
+  }
+}
+
+async function fetchSchools(lat,lon,radiusMiles,typeFilter){
+  const radiusM=Math.round(radiusMiles*MILES_TO_METRES);
+  // DfE GIAS API — free, no key, returns schools within radius
+  // Endpoint: get-information-schools.service.gov.uk/api/schools
+  // Note: Ofsted ratings removed from GIAS Jan 2025, so we get school type + phase, link to reports
+  const url=`https://get-information-schools.service.gov.uk/api/schools?lat=${lat}&lon=${lon}&RadiusInMiles=${radiusMiles}&includeOpenOnly=true&MaximumRecords=50`;
+  
+  try{
+    const res=await fetch(url);
+    if(!res.ok)throw new Error('DfE API error');
+    const json=await res.json();
+    let schools=(json.Schools||json.schools||[]).map(s=>({
+      name:s.EstablishmentName||s.name,
+      urn:s.URN||s.urn,
+      type:s.TypeOfEstablishment||s.type||'',
+      phase:s.PhaseOfEducation||s.phase||'',
+      lat:parseFloat(s.Latitude||s.lat||lat),
+      lon:parseFloat(s.Longitude||s.lon||lon),
+      ofsted:'unknown', // ratings no longer in GIAS; link to reports instead
+      dist:haversine(lat,lon,parseFloat(s.Latitude||s.lat||lat),parseFloat(s.Longitude||s.lon||lon)),
+    }));
+    // filter by phase
+    if(typeFilter==='secondary')schools=schools.filter(s=>/secondary|high|middle/i.test(s.phase+' '+s.type));
+    else if(typeFilter==='primary')schools=schools.filter(s=>/primary|first|junior/i.test(s.phase+' '+s.type));
+    return schools.sort((a,b)=>a.dist-b.dist).slice(0,15);
+  }catch(e){
+    // Fallback: return empty (DfE API has CORS restrictions in browser — will use note)
+    return[];
+  }
+}
+
+async function fetchTransport(lat,lon,trainRadiusMiles,busRadiusMiles){
+  const trainM=Math.round(trainRadiusMiles*MILES_TO_METRES);
+  const busM=Math.round(busRadiusMiles*MILES_TO_METRES);
+  // Overpass API — free, no key
+  const query=`[out:json][timeout:15];
+(
+  node["railway"="station"](around:${trainM},${lat},${lon});
+  node["railway"="halt"](around:${trainM},${lat},${lon});
+  node["public_transport"="station"](around:${trainM},${lat},${lon});
+  node["highway"="bus_stop"](around:${busM},${lat},${lon});
+  node["public_transport"="platform"](around:${busM},${lat},${lon});
+);
+out body;`;
+  try{
+    const res=await fetch('https://overpass-api.de/api/interpreter',{
+      method:'POST',body:'data='+encodeURIComponent(query)
+    });
+    const json=await res.json();
+    const stations=[],busstops=[];
+    (json.elements||[]).forEach(el=>{
+      const tags=el.tags||{};
+      const dist=haversine(lat,lon,el.lat,el.lon);
+      const name=tags.name||tags['name:en']||'Unnamed';
+      if(tags.railway==='station'||tags.railway==='halt'||tags.public_transport==='station'){
+        if(!stations.find(s=>s.name===name))stations.push({name,dist,lat:el.lat,lon:el.lon,operator:tags.operator||''});
+      } else if(tags.highway==='bus_stop'||tags.public_transport==='platform'){
+        busstops.push({name,dist,routes:tags.route_ref||tags.ref||''});
+      }
+    });
+    return{
+      stations:stations.sort((a,b)=>a.dist-b.dist).slice(0,5),
+      busstops:busstops.sort((a,b)=>a.dist-b.dist).slice(0,10),
+    };
+  }catch(e){
+    return{stations:[],busstops:[]};
+  }
+}
+
+function haversine(lat1,lon1,lat2,lon2){
+  const R=3958.8; // miles
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function computeIntelScore(schools,transport,postcode,lat,lon,district,region,sr,tr,br){
+  const{stations,busstops}=transport;
+
+  // School score (0–10)
+  // Proxy: number of schools found, closeness, type mix
+  // Since Ofsted ratings no longer in GIAS directly, score is based on:
+  // - how many schools within radius (density = good catchment area)
+  // - nearest school distance
+  const numSchools=schools.length;
+  const nearestSchool=numSchools>0?schools[0].dist:99;
+  const secondarySchools=schools.filter(s=>/secondary|high/i.test(s.phase+' '+s.type)).length;
+  const primarySchools=schools.filter(s=>/primary|first|junior/i.test(s.phase+' '+s.type)).length;
+  let schoolScore=0;
+  if(numSchools>=8)schoolScore=9;
+  else if(numSchools>=5)schoolScore=8;
+  else if(numSchools>=3)schoolScore=7;
+  else if(numSchools>=1)schoolScore=5;
+  if(nearestSchool<0.5)schoolScore=Math.min(10,schoolScore+1);
+  else if(nearestSchool>1.5)schoolScore=Math.max(0,schoolScore-1);
+
+  // Transport score (0–10)
+  const numStations=stations.length;
+  const nearestStation=numStations>0?stations[0].dist:99;
+  const numBuses=busstops.length;
+  let transportScore=0;
+  if(numStations>0&&nearestStation<0.5)transportScore+=5;
+  else if(numStations>0&&nearestStation<1)transportScore+=4;
+  else if(numStations>0&&nearestStation<1.5)transportScore+=3;
+  else if(numStations>0)transportScore+=2;
+  if(numBuses>=5)transportScore+=4;
+  else if(numBuses>=3)transportScore+=3;
+  else if(numBuses>=1)transportScore+=2;
+  transportScore=Math.min(10,transportScore);
+
+  // Overall area score
+  const areaScore=Math.round((schoolScore*0.5+transportScore*0.35+Math.min(10,numSchools)*0.15));
+
+  return{
+    postcode,lat,lon,district,region,
+    schools,stations,busstops,
+    numSchools,nearestSchool,secondarySchools,primarySchools,
+    numStations,nearestStation,numBuses,
+    schoolScore:Math.round(schoolScore),
+    transportScore:Math.round(transportScore),
+    areaScore:Math.min(10,Math.round(areaScore)),
+    schoolRadius:sr,trainRadius:tr,busRadius:br,
+  };
+}
+
+function renderAreaIntel(intel,container,sr,tr,br){
+  const scoreColor=intel.areaScore>=8?'var(--accent)':intel.areaScore>=6?'#d48b00':'#c44';
+  const scorePct=intel.areaScore*10;
+
+  const schoolsHtml=intel.schools.length===0?
+    `<div class="alert alert-warn" style="margin-top:0">No schools found via DfE API — this can happen due to browser CORS restrictions on the DfE endpoint.
+    <br><br>Workaround: <a href="https://www.locrating.com/" target="_blank" style="color:var(--warn)">Open Locrating</a> or 
+    <a href="https://get-information-schools.service.gov.uk/Search?SearchType=LocalAuthority" target="_blank" style="color:var(--warn)">DfE Schools search</a> for ${intel.postcode}</div>`:
+    intel.schools.map(s=>{
+      const distMi=s.dist.toFixed(2);
+      const phase=s.phase||s.type||'Unknown phase';
+      const isSecondary=/secondary|high/i.test(phase+' '+s.type);
+      const isPrimary=/primary|first|junior/i.test(phase+' '+s.type);
+      const typeLabel=isSecondary?'Secondary':isPrimary?'Primary':'School';
+      return`<div class="school-row">
+        <div style="flex:1">
+          <div class="school-name">${s.name}</div>
+          <div class="school-meta">${phase} · <a href="https://reports.ofsted.gov.uk/provider/list/0/${s.urn}" target="_blank" style="color:var(--blue);font-size:11px">Ofsted report ↗</a></div>
+        </div>
+        <span class="badge ${isSecondary?'badge-blue':isPrimary?'badge-green':'badge-gray'}" style="margin-right:6px">${typeLabel}</span>
+        <span class="school-dist">${distMi} mi</span>
+      </div>`;
+    }).join('');
+
+  const stationsHtml=intel.stations.length===0?
+    `<div style="font-size:13px;color:var(--text3);padding:8px 0">No train stations found within ${tr} miles</div>`:
+    intel.stations.map(s=>`<div class="transport-row"><div class="transport-icon t-rail">🚉</div><div style="flex:1"><div>${s.name}</div>${s.operator?`<div style="font-size:11px;color:var(--text3)">${s.operator}</div>`:''}</div><span style="color:var(--text3);font-size:12px">${s.dist.toFixed(2)} mi</span></div>`).join('');
+
+  const busHtml=intel.busstops.length===0?
+    `<div style="font-size:13px;color:var(--text3);padding:8px 0">No bus stops found within ${br} miles</div>`:
+    intel.busstops.slice(0,6).map(b=>`<div class="transport-row"><div class="transport-icon t-bus">🚌</div><div style="flex:1"><div>${b.name}</div>${b.routes?`<div style="font-size:11px;color:var(--text3)">Routes: ${b.routes}</div>`:''}</div><span style="color:var(--text3);font-size:12px">${b.dist.toFixed(2)} mi</span></div>`).join('');
+
+  const schoolScoreBar=`<div class="score-row" style="margin-bottom:0">
+    <div class="score-row-label">School density</div>
+    <div class="progress-wrap" style="flex:1"><div class="progress-bar" style="width:${intel.schoolScore*10}%;background:${intel.schoolScore>=7?'var(--accent)':intel.schoolScore>=5?'#d48b00':'#c44'}"></div></div>
+    <div class="score-row-val">${intel.schoolScore}/10</div>
+  </div>`;
+  const transportScoreBar=`<div class="score-row" style="margin:6px 0 0">
+    <div class="score-row-label">Transport access</div>
+    <div class="progress-wrap" style="flex:1"><div class="progress-bar" style="width:${intel.transportScore*10}%;background:${intel.transportScore>=7?'var(--accent)':intel.transportScore>=5?'#d48b00':'#c44'}"></div></div>
+    <div class="score-row-val">${intel.transportScore}/10</div>
+  </div>`;
+
+  container.innerHTML=`
+  <div class="intel-card" style="margin-bottom:1rem">
+    <div class="intel-header">
+      <div>
+        <div style="font-size:18px;font-weight:600">${intel.postcode}</div>
+        <div style="font-size:14px;color:var(--text2);margin-top:2px">${intel.district||''} ${intel.region?'· '+intel.region:''}</div>
+        <div style="margin-top:10px">
+          ${schoolScoreBar}${transportScoreBar}
+        </div>
+      </div>
+      <div style="text-align:center;flex-shrink:0;margin-left:1.5rem">
+        <div style="font-size:36px;font-weight:700;color:${scoreColor};line-height:1">${intel.areaScore}<span style="font-size:18px">/10</span></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.5px">Area score</div>
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+          <span class="badge badge-blue">${intel.numSchools} school${intel.numSchools!==1?'s':''} (${sr}mi)</span>
+          <span class="badge badge-gray">${intel.numStations} station${intel.numStations!==1?'s':''}</span>
+          <span class="badge badge-gray">${intel.numBuses} bus stops</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="intel-body">
+      <div class="grid-2">
+        <div>
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:10px">
+            Schools within ${sr} miles — ${intel.secondarySchools} secondary · ${intel.primarySchools} primary
+          </div>
+          <div style="font-size:12px;color:var(--info);background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:6px;padding:8px;margin-bottom:10px">
+            Ofsted ratings are no longer available via the DfE API (removed Jan 2025). Click each school's "Ofsted report ↗" link for the latest rating. For catchment maps, use your <strong>Locrating</strong> subscription.
+          </div>
+          ${schoolsHtml}
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:10px">Train stations within ${tr} miles</div>
+          ${stationsHtml}
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin:14px 0 10px">Bus stops within ${br} miles</div>
+          ${busHtml}
+        </div>
+      </div>
+
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap">
+        <a href="https://www.locrating.com/schools.aspx#postcode=${intel.postcode}" target="_blank" class="btn btn-ghost btn-sm">Locrating schools ↗</a>
+        <a href="https://www.gov.uk/check-flood-risk" target="_blank" class="btn btn-ghost btn-sm">Flood risk ↗</a>
+        <a href="https://find-energy-certificate.service.gov.uk/find-a-certificate/search-by-postcode?postcode=${intel.postcode}" target="_blank" class="btn btn-ghost btn-sm">EPC lookup ↗</a>
+        <a href="https://checker.ofcom.org.uk/?postcode=${intel.postcode}" target="_blank" class="btn btn-ghost btn-sm">Ofcom broadband ↗</a>
+        <a href="https://www.police.uk/pu/your-area/crime-statistics/?AreaName=${intel.postcode}" target="_blank" class="btn btn-ghost btn-sm">Crime stats ↗</a>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// SDLT
+// ═══════════════════════════════════════════════════════════
+function calcSDLTForAmount(price,ftb=true){
+  if(!price||price<=0)return{tax:0,breakdown:[]};
+  if(ftb){
+    if(price<=300000)return{tax:0,breakdown:[{band:'Up to £300,000',rate:'0%',amount:0}]};
+    if(price<=500000){
+      const tax=(price-300000)*0.05;
+      return{tax,breakdown:[{band:'£0–£300,000',rate:'0%',amount:0},{band:`£300,001–£${price.toLocaleString()}`,rate:'5%',amount:tax}]};
+    }
+  }
+  // Standard rates
+  const slabs=ftb?
+    [[0,250000,0.05],[250001,925000,0.10],[925001,1500000,0.12]]:
+    [[0,125000,0.02],[125001,250000,0.05],[250001,925000,0.10],[925001,1500000,0.12]];
+  let tax=0;const breakdown=[];
+  for(const[lo,hi,rate]of slabs){
+    if(price<=lo)break;
+    const top=Math.min(price,hi);
+    const chunk=(top-lo)*rate;
+    tax+=chunk;
+    breakdown.push({band:`£${lo.toLocaleString()}–£${top.toLocaleString()}`,rate:`${rate*100}%`,amount:chunk});
+  }
+  return{tax,breakdown};
+}
+
+function calcSDLT(){
+  const price=parseFloat(document.getElementById('sdlt-price').value);
+  const ftb=document.getElementById('b-ftb')?.value!=='0';
+  const el=document.getElementById('sdlt-result');
+  if(!price){el.innerHTML='';return;}
+  const{tax,breakdown}=calcSDLTForAmount(price,ftb);
+  el.innerHTML=`<div class="sdlt-result">
+    ${breakdown.map(b=>`<div class="sdlt-row"><span>${b.band}</span><span>${b.rate} = £${Math.round(b.amount).toLocaleString()}</span></div>`).join('')}
+    <div class="sdlt-row sdlt-total"><span>Total SDLT</span><span style="color:var(--accent)">£${Math.round(tax).toLocaleString()}</span></div>
+    ${price>500000&&ftb?'<div style="font-size:12px;color:var(--warn);margin-top:6px">Above £500k — FTB relief does not apply. Standard rates on full amount.</div>':''}
+  </div>`;
+}
+
+function updatePropSDLT(){
+  const price=parseFloat(document.getElementById('p-price').value)||0;
+  const el=document.getElementById('prop-sdlt-preview');
+  if(!price){el.innerHTML='';return;}
+  const ftb=data.budget.ftb!==0;
+  const{tax}=calcSDLTForAmount(price,ftb);
+  el.innerHTML=`<div class="alert ${price>500000&&ftb?'alert-warn':'alert-success'}" style="margin-top:8px">
+    SDLT: <strong>£${Math.round(tax).toLocaleString()}</strong>
+    ${price>500000&&ftb?' — FTB relief does not apply above £500k':''}
+    ${price<=300000&&ftb?' — No SDLT as FTB':''}
+  </div>`;
+}
+
+function calcBudget(){
+  const ftb=document.getElementById('b-ftb')?.value!=='0';
+  const maxprice=parseFloat(document.getElementById('b-maxprice').value)||0;
+  const deposit=parseFloat(document.getElementById('b-deposit').value)||0;
+  const solicitor=parseFloat(document.getElementById('b-solicitor').value)||2500;
+  const survey=parseFloat(document.getElementById('b-survey').value)||700;
+  const removals=parseFloat(document.getElementById('b-removals').value)||1500;
+  if(!maxprice||!deposit)return;
+  const{tax}=calcSDLTForAmount(maxprice,ftb);
+  const totalCosts=tax+solicitor+survey+removals;
+  const cashNeeded=deposit+totalCosts;
+  const loan=maxprice-deposit;
+  document.getElementById('budget-summary').innerHTML=`<div class="sdlt-result" style="background:var(--surface2);border-color:var(--border)">
+    <div class="sdlt-row"><span>Deposit</span><span>£${deposit.toLocaleString()}</span></div>
+    <div class="sdlt-row"><span>SDLT (on £${maxprice.toLocaleString()})</span><span>£${Math.round(tax).toLocaleString()}</span></div>
+    <div class="sdlt-row"><span>Solicitor / conveyancing</span><span>£${solicitor.toLocaleString()}</span></div>
+    <div class="sdlt-row"><span>Survey</span><span>£${survey.toLocaleString()}</span></div>
+    <div class="sdlt-row"><span>Removals & misc</span><span>£${removals.toLocaleString()}</span></div>
+    <div class="sdlt-row sdlt-total"><span>Total cash required</span><span style="color:var(--accent)">£${Math.round(cashNeeded).toLocaleString()}</span></div>
+    <div class="sdlt-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><span>Mortgage required</span><span>£${Math.round(loan).toLocaleString()} (${Math.round((loan/maxprice)*100)}% LTV)</span></div>
+  </div>`;
+}
+
+function saveBudget(){
+  data.budget={
+    ftb:document.getElementById('b-ftb').value==='1'?1:0,
+    deposit:parseFloat(document.getElementById('b-deposit').value)||0,
+    maxprice:parseFloat(document.getElementById('b-maxprice').value)||0,
+    solicitor:parseFloat(document.getElementById('b-solicitor').value)||2500,
+    survey:parseFloat(document.getElementById('b-survey').value)||700,
+    removals:parseFloat(document.getElementById('b-removals').value)||1500,
+    schoolArea:document.getElementById('b-school-area').value,
+  };
+  save();calcBudget();renderOverview();
+}
+
+function restoreBudget(){
+  const b=data.budget;
+  if(b.maxprice){
+    if(document.getElementById('b-ftb'))document.getElementById('b-ftb').value=b.ftb===0?'0':'1';
+    if(document.getElementById('b-deposit'))document.getElementById('b-deposit').value=b.deposit||'';
+    if(document.getElementById('b-maxprice'))document.getElementById('b-maxprice').value=b.maxprice||'';
+    if(document.getElementById('b-solicitor'))document.getElementById('b-solicitor').value=b.solicitor||'';
+    if(document.getElementById('b-survey'))document.getElementById('b-survey').value=b.survey||'';
+    if(document.getElementById('b-removals'))document.getElementById('b-removals').value=b.removals||'';
+    if(document.getElementById('b-school-area'))document.getElementById('b-school-area').value=b.schoolArea||'';
+    calcBudget();
+  }
+}
+
+function renderSDLTComparison(){
+  const prices=[300000,380000,450000,480000,499999,500000,520000,540000];
+  const labels=['£300k','£380k','£450k','£480k','£499,999','£500k','£520k','£540k'];
+  const ftb=data.budget.ftb!==0;
+  const el=document.getElementById('sdlt-comparison');
+  if(!el)return;
+  el.innerHTML=`<table style="width:100%;font-size:13px;border-collapse:collapse">
+    <thead><tr style="border-bottom:1px solid var(--border)">
+      <th style="text-align:left;padding:6px 0;color:var(--text2);font-weight:500">Price</th>
+      <th style="text-align:right;padding:6px;color:var(--text2);font-weight:500">SDLT</th>
+      <th style="text-align:right;padding:6px;color:var(--text2);font-weight:500">vs prev</th>
+      <th style="text-align:right;padding:6px;color:var(--text2);font-weight:500">Note</th>
+    </tr></thead><tbody>
+    ${prices.map((p,i)=>{
+      const{tax}=calcSDLTForAmount(p,ftb);
+      const prev=i>0?calcSDLTForAmount(prices[i-1],ftb).tax:0;
+      const diff=tax-prev;
+      const isCliff=p===500000||p===300000;
+      return`<tr style="border-bottom:1px solid var(--border);${isCliff?'background:var(--warn-bg)':''}">
+        <td style="padding:8px 0;font-weight:${isCliff?'600':'400'}">${labels[i]}</td>
+        <td style="text-align:right;padding:8px;color:var(--accent);font-weight:500">£${Math.round(tax).toLocaleString()}</td>
+        <td style="text-align:right;padding:8px;color:${diff>500?'var(--danger)':'var(--text3)'}">+£${Math.round(diff).toLocaleString()}</td>
+        <td style="text-align:right;padding:8px;color:var(--text3);font-size:12px">${p===300000?'⚠ FTB threshold':p===499999?'Last price with FTB relief':p===500000?'⚠ Standard rates apply':''}</td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// PROPERTIES
+// ═══════════════════════════════════════════════════════════
+function openAddProperty(){
+  editingPropIdx=-1;
+  document.getElementById('prop-modal-title').textContent='Add Property';
+  document.getElementById('delete-prop-btn').style.display='none';
+  ['p-address','p-price','p-beds','p-postcode','p-url','p-offer','p-maxoffer','p-offer-notes','p-viewing-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['p-note-impression','p-note-damp','p-note-ext','p-note-gut'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('p-status').value='watching';
+  document.getElementById('p-chain').value='unknown';
+  document.getElementById('prop-sdlt-preview').innerHTML='';
+  document.getElementById('p-intel-result').innerHTML='';
+  initScoreSliders({});
+  switchPropTab('details',document.querySelector('.tab-btn'));
+  document.getElementById('prop-modal').classList.add('open');
+}
+
+function openEditProperty(idx){
+  editingPropIdx=idx;
+  const p=data.properties[idx];
+  document.getElementById('prop-modal-title').textContent='Edit Property';
+  document.getElementById('delete-prop-btn').style.display='inline-flex';
+  document.getElementById('p-address').value=p.address||'';
+  document.getElementById('p-price').value=p.price||'';
+  document.getElementById('p-beds').value=p.beds||'';
+  document.getElementById('p-postcode').value=p.postcode||'';
+  document.getElementById('p-url').value=p.url||'';
+  document.getElementById('p-status').value=p.status||'watching';
+  document.getElementById('p-offer').value=p.offer||'';
+  document.getElementById('p-maxoffer').value=p.maxoffer||'';
+  document.getElementById('p-offer-notes').value=p.offerNotes||'';
+  document.getElementById('p-chain').value=p.chain||'unknown';
+  document.getElementById('p-viewing-date').value=p.viewingDate||'';
+  document.getElementById('p-note-impression').value=p.notes?.impression||'';
+  document.getElementById('p-note-damp').value=p.notes?.damp||'';
+  document.getElementById('p-note-ext').value=p.notes?.ext||'';
+  document.getElementById('p-note-gut').value=p.notes?.gut||'';
+  updatePropSDLT();
+  initScoreSliders(p.scores||{});
+  // Show cached intel
+  if(p.intel){
+    const el=document.getElementById('p-intel-result');
+    el.innerHTML=`<div class="alert alert-success">Area score: ${p.intel.areaScore}/10 · ${p.intel.numSchools} schools · ${p.intel.numStations} stations · ${p.intel.numBuses} bus stops (cached)</div>`;
+  }
+  switchPropTab('details',document.querySelector('.tab-btn'));
+  document.getElementById('prop-modal').classList.add('open');
+}
+
+function closePropModal(){document.getElementById('prop-modal').classList.remove('open')}
+
+async function runIntelForProp(){
+  const postcode=document.getElementById('p-postcode').value.trim().toUpperCase();
+  if(!postcode){alert('Enter a postcode first');return;}
+  const btn=document.getElementById('p-run-intel-btn');
+  const spin=document.getElementById('p-intel-spin');
+  btn.disabled=true;spin.style.display='inline-block';
+  const el=document.getElementById('p-intel-result');
+  el.innerHTML='<span style="font-size:13px;color:var(--text2)">Fetching schools & transport…</span>';
+  try{
+    const pcRes=await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(postcode)}`);
+    const pcData=await pcRes.json();
+    if(pcData.status!==200)throw new Error('Invalid postcode');
+    const{latitude:lat,longitude:lon}=pcData.result;
+    const sr=data.settings.schoolRadius||2;
+    const tr=data.settings.trainRadius||1.5;
+    const br=data.settings.busRadius||0.5;
+    const[schools,transport]=await Promise.all([fetchSchools(lat,lon,sr,'all'),fetchTransport(lat,lon,tr,br)]);
+    const intel=computeIntelScore(schools,transport,postcode,lat,lon,'','',sr,tr,br);
+    lastIntelData=intel;
+    // Auto-fill score sliders
+    const curScores=getScoreValues();
+    curScores.schools=intel.schoolScore;
+    curScores.transport=intel.transportScore;
+    initScoreSliders(curScores);
+    el.innerHTML=`<div class="alert alert-success">
+      Area score: <strong>${intel.areaScore}/10</strong> · 
+      ${intel.numSchools} schools (${sr}mi) · 
+      ${intel.numStations} train station${intel.numStations!==1?'s':''} · 
+      ${intel.numBuses} bus stops · 
+      School score: ${intel.schoolScore}/10 · Transport: ${intel.transportScore}/10
+    </div>`;
+  }catch(e){
+    el.innerHTML=`<div class="alert alert-warn">${e.message}</div>`;
+  }finally{
+    btn.disabled=false;spin.style.display='none';
+  }
+}
+
+function saveProperty(){
+  const prop={
+    address:document.getElementById('p-address').value,
+    price:parseFloat(document.getElementById('p-price').value)||0,
+    beds:parseInt(document.getElementById('p-beds').value)||0,
+    postcode:document.getElementById('p-postcode').value.toUpperCase(),
+    url:document.getElementById('p-url').value,
+    status:document.getElementById('p-status').value,
+    offer:parseFloat(document.getElementById('p-offer').value)||0,
+    maxoffer:parseFloat(document.getElementById('p-maxoffer').value)||0,
+    offerNotes:document.getElementById('p-offer-notes').value,
+    chain:document.getElementById('p-chain').value,
+    viewingDate:document.getElementById('p-viewing-date').value,
+    notes:{
+      impression:document.getElementById('p-note-impression').value,
+      damp:document.getElementById('p-note-damp').value,
+      ext:document.getElementById('p-note-ext').value,
+      gut:document.getElementById('p-note-gut').value,
+    },
+    scores:getScoreValues(),
+    intel:lastIntelData,
+  };
+  if(editingPropIdx===-1)data.properties.push(prop);
+  else data.properties[editingPropIdx]=prop;
+  save();closePropModal();renderPropertiesList();renderOverview();
+}
+
+function deleteProperty(){
+  if(!confirm('Remove this property?'))return;
+  data.properties.splice(editingPropIdx,1);
+  save();closePropModal();renderPropertiesList();renderOverview();
+}
+
+function calcCompositeScore(scores){
+  let total=0,maxTotal=0;
+  SCORE_DIMS.forEach(d=>{total+=(scores[d.key]||0)*d.weight;maxTotal+=10*d.weight;});
+  return Math.round((total/maxTotal)*100);
+}
+
+function initScoreSliders(scores){
+  const el=document.getElementById('score-sliders');
+  el.innerHTML=SCORE_DIMS.map(d=>`
+    <div class="score-row" style="margin-bottom:12px">
+      <div class="score-row-label">${d.label}${d.weight>=2?' ★':''}</div>
+      <input type="range" min="0" max="10" step="1" value="${scores[d.key]??5}" id="score-${d.key}" oninput="updateComposite()" style="flex:1">
+      <div class="score-row-val" id="score-val-${d.key}">${scores[d.key]??5}</div>
+    </div>`).join('');
+  updateComposite();
+}
+
+function updateComposite(){
+  SCORE_DIMS.forEach(d=>{
+    const el=document.getElementById('score-val-'+d.key);
+    if(el)el.textContent=document.getElementById('score-'+d.key).value;
+  });
+  const s=getScoreValues();
+  const c=calcCompositeScore(s);
+  const el=document.getElementById('composite-score');
+  if(el){el.textContent=c;el.style.color=c>=70?'var(--accent)':c>=50?'var(--warn)':'var(--danger)';}
+}
+
+function getScoreValues(){
+  const s={};
+  SCORE_DIMS.forEach(d=>{const el=document.getElementById('score-'+d.key);s[d.key]=el?parseInt(el.value):5;});
+  return s;
+}
+
+function switchPropTab(tab,btn){
+  ['details','score','offer','notes'].forEach(t=>{
+    const el=document.getElementById('ptab-'+t);if(el)el.style.display=t===tab?'block':'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  if(tab==='score')updateComposite();
+}
+
+function statusBadge(status){
+  const map={watching:['badge-gray','Watching'],'viewing-booked':['badge-info','Viewing Booked'],viewed:['badge-info','Viewed'],'offer-pending':['badge-warn','Offer Pending'],'offer-accepted':['badge-green','Offer Accepted'],rejected:['badge-danger','Rejected']};
+  const[cls,lbl]=map[status]||['badge-gray',status];
+  return`<span class="badge ${cls}">${lbl}</span>`;
+}
+
+function renderPropertiesList(){
+  const el=document.getElementById('properties-list');
+  if(!el)return;
+  if(!data.properties.length){
+    el.innerHTML=`<div class="empty-state"><div style="font-size:36px">🏡</div><p>No properties yet. Use the Rightmove Parser or add manually.</p></div>`;
+    return;
+  }
+  el.innerHTML=data.properties.map((p,i)=>{
+    const ftb=data.budget.ftb!==0;
+    const{tax}=calcSDLTForAmount(p.price,ftb);
+    const score=calcCompositeScore(p.scores||{});
+    const scoreColor=score>=70?'var(--accent)':score>=50?'var(--warn)':'#c44';
+    const intel=p.intel;
+    return`<div class="card" style="margin-bottom:1rem">
+      <div class="flex-between" style="margin-bottom:10px">
+        <div>
+          <div style="font-size:16px;font-weight:600">${p.address||'Unnamed property'}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+            ${statusBadge(p.status)}
+            ${p.beds?`<span class="badge badge-gray">${p.beds} bed</span>`:''}
+            ${p.postcode?`<span class="badge badge-blue">${p.postcode}</span>`:''}
+            ${intel?`<span class="badge badge-green">Area: ${intel.areaScore}/10</span>`:''}
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:18px;font-weight:600;color:var(--accent)">£${p.price?p.price.toLocaleString():'TBC'}</div>
+          ${p.price?`<div style="font-size:12px;color:var(--text3)">SDLT: £${Math.round(tax).toLocaleString()}</div>`:''}
+        </div>
+      </div>
+      <div style="margin-bottom:8px">
+        <div class="flex-between" style="margin-bottom:4px"><span style="font-size:13px;color:var(--text2)">Property score</span><span style="font-size:13px;font-weight:600;color:${scoreColor}">${score}/100</span></div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:${score}%;background:${scoreColor}"></div></div>
+      </div>
+      ${SCORE_DIMS.map(d=>{const v=(p.scores||{})[d.key]||0;return`<div class="score-row" style="margin-bottom:3px"><div class="score-row-label" style="width:130px">${d.label}</div><div class="progress-wrap" style="flex:1"><div class="progress-bar" style="width:${v*10}%;background:${v>=7?'var(--accent)':v>=5?'#d48b00':'#c44'}"></div></div><div class="score-row-val">${v}</div></div>`;}).join('')}
+      ${intel?`<div style="margin-top:10px;padding:8px 12px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:6px;font-size:12px;color:var(--blue)">
+        📍 ${intel.numSchools} schools · ${intel.numStations} station${intel.numStations!==1?'s':''} within ${intel.trainRadius}mi · ${intel.numBuses} bus stops within ${intel.busRadius}mi
+        ${intel.stations.length?'· Nearest station: '+intel.stations[0].name+' ('+intel.stations[0].dist.toFixed(2)+'mi)':''}
+      </div>`:''}
+      ${p.notes?.gut?`<div style="margin-top:8px"><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:4px">GUT FEEL</div><div class="notes-box">${p.notes.gut}</div></div>`:''}
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="openEditProperty(${i})">Edit</button>
+        ${p.postcode?`<button class="btn btn-info btn-sm" onclick="document.getElementById('postcode-input').value='${p.postcode}';showSection('parser');runAreaIntel('${p.postcode}')">Re-run Area Intel</button>`:''}
+        ${p.url?`<a href="${p.url}" class="btn btn-ghost btn-sm" target="_blank">View Listing ↗</a>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHECKLIST
+// ═══════════════════════════════════════════════════════════
+function renderChecklistSections(){
+  const el=document.getElementById('checklist-sections');
+  if(!el)return;
+  let totalDone=0,totalItems=0;
+  el.innerHTML=CHECKLIST_SECTIONS.map(section=>{
+    const sectionDone=section.items.filter(i=>data.checklist[i.id]).length;
+    totalDone+=sectionDone;totalItems+=section.items.length;
+    return`<div class="card" style="margin-bottom:1rem">
+      <div class="flex-between" style="margin-bottom:1rem">
+        <div class="card-title" style="margin-bottom:0">${section.title}</div>
+        <span class="badge ${sectionDone===section.items.length?'badge-green':'badge-gray'}">${sectionDone}/${section.items.length}</span>
+      </div>
+      ${section.items.map(item=>{
+        const done=!!data.checklist[item.id];
+        return`<div class="checklist-item ${done?'done':''}">
+          <input type="checkbox" id="chk-${item.id}" ${done?'checked':''} onchange="toggleCheck('${item.id}',this.checked)">
+          <div><label for="chk-${item.id}">${item.text}</label>${item.meta?`<div class="item-meta">${item.meta}</div>`:''}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+  const pct=totalItems?Math.round((totalDone/totalItems)*100):0;
+  const bar=document.getElementById('checklist-progress-bar');
+  if(bar){bar.style.width=pct+'%';bar.className='progress-bar'+(pct>=75?' ':pct>=40?' warn':' danger');}
+  const pctLbl=document.getElementById('checklist-pct-label');
+  if(pctLbl)pctLbl.textContent=`${totalDone} / ${totalItems} (${pct}%)`;
+  const badge=document.getElementById('checklist-summary-badge');
+  if(badge)badge.innerHTML=`<span class="badge ${pct>=75?'badge-green':pct>=40?'badge-warn':'badge-danger'}">${pct}% ready</span>`;
+}
+
+function toggleCheck(id,val){data.checklist[id]=val;save();renderChecklistSections();renderOverview()}
+
+// ═══════════════════════════════════════════════════════════
+// OVERVIEW
+// ═══════════════════════════════════════════════════════════
+function renderOverview(){
+  const s=data.settings;
+  const subEl=document.getElementById('overview-sub');
+  if(subEl)subEl.textContent=s.name||'Your UK home search at a glance';
+
+  const totalItems=CHECKLIST_SECTIONS.flatMap(s=>s.items).length;
+  const totalDone=CHECKLIST_SECTIONS.flatMap(s=>s.items).filter(i=>data.checklist[i.id]).length;
+  const pct=totalItems?Math.round((totalDone/totalItems)*100):0;
+  const propsCount=data.properties.length;
+  const topProp=propsCount?data.properties.reduce((a,b)=>calcCompositeScore(a.scores||{})>calcCompositeScore(b.scores||{})?a:b):null;
+  const topScore=topProp?calcCompositeScore(topProp.scores||{}):0;
+  const avgAreaScore=propsCount?Math.round(data.properties.filter(p=>p.intel).reduce((s,p)=>s+p.intel.areaScore,0)/Math.max(1,data.properties.filter(p=>p.intel).length)):0;
+
+  const badge=document.getElementById('overall-readiness-badge');
+  if(badge)badge.innerHTML=`<span class="badge ${pct>=75?'badge-green':pct>=40?'badge-warn':'badge-danger'}" style="font-size:14px;padding:6px 14px">${pct}% Ready</span>`;
+
+  const statsEl=document.getElementById('overview-stats');
+  if(statsEl)statsEl.innerHTML=`
+    <div class="stat-card ${pct>=75?'green':pct>=40?'warn':'danger'}"><div class="stat-label">Readiness</div><div class="stat-value">${pct}%</div><div class="stat-sub">${totalDone}/${totalItems} tasks</div></div>
+    <div class="stat-card"><div class="stat-label">Properties</div><div class="stat-value">${propsCount}</div><div class="stat-sub">${data.properties.filter(p=>p.intel).length} with area data</div></div>
+    <div class="stat-card ${topScore>=70?'green':topScore>=50?'warn':''}"><div class="stat-label">Top Score</div><div class="stat-value">${topScore||'—'}</div><div class="stat-sub">${topProp?topProp.address?.split(',')[0]:'No properties'}</div></div>
+    <div class="stat-card info"><div class="stat-label">Avg Area Score</div><div class="stat-value">${avgAreaScore||'—'}</div><div class="stat-sub">${data.budget.maxprice?'Budget: £'+(data.budget.maxprice/1000).toFixed(0)+'k':s.area||'Set budget'}</div></div>`;
+
+  const stages=[
+    {label:'Financial prep',done:['aip','deposit','payslips','bankstat'].filter(i=>data.checklist[i]).length,total:4},
+    {label:'School research',done:['schools-checked','council-call'].filter(i=>data.checklist[i]).length,total:2},
+    {label:'Legal / solicitor',done:['solicitor-shortlist','solicitor-instructed'].filter(i=>data.checklist[i]).length,total:2},
+    {label:'Property research',done:['land-registry','flood-check','epc-check'].filter(i=>data.checklist[i]).length,total:3},
+    {label:'Offer readiness',done:['offer-strategy','buildings-ins'].filter(i=>data.checklist[i]).length,total:2},
+  ];
+  const progEl=document.getElementById('readiness-progress-list');
+  if(progEl)progEl.innerHTML=stages.map(s=>{
+    const p=Math.round((s.done/s.total)*100);
+    return`<div style="margin-bottom:12px">
+      <div class="flex-between" style="margin-bottom:4px"><span style="font-size:13px">${s.label}</span><span style="font-size:12px;color:var(--text3)">${s.done}/${s.total}</span></div>
+      <div class="progress-wrap"><div class="progress-bar ${p===100?'':p>=50?'warn':'danger'}" style="width:${p}%"></div></div>
+    </div>`;
+  }).join('');
+
+  const propsEl=document.getElementById('overview-props-list');
+  if(propsEl){
+    if(!propsCount){
+      propsEl.innerHTML=`<div style="font-size:13px;color:var(--text3);padding:1rem 0">No properties yet. <button class="btn btn-ghost btn-sm" onclick="showSection('parser')">Use Rightmove Parser</button></div>`;
+    } else {
+      propsEl.innerHTML=data.properties.slice(0,5).map((p,i)=>{
+        const score=calcCompositeScore(p.scores||{});
+        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div>
+            <div style="font-size:14px;font-weight:500">${p.address?p.address.split(',')[0]:'Unnamed'}</div>
+            <div style="font-size:12px;color:var(--text2)">${p.postcode||''}${p.intel?' · Area: '+p.intel.areaScore+'/10':''}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:14px;font-weight:600;color:var(--accent)">£${p.price?(p.price/1000).toFixed(0)+'k':'—'}</div>
+            <div style="font-size:12px;color:var(--text3)">Score: ${score}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  const actions=[];
+  if(!data.checklist['aip'])actions.push({text:'Get your Mortgage in Principle (AIP)',p:'high'});
+  if(!data.checklist['schools-checked'])actions.push({text:'Run area intelligence for target postcodes — check school quality',p:'high'});
+  if(!data.checklist['solicitor-shortlist'])actions.push({text:'Shortlist 2–3 conveyancing solicitors',p:'medium'});
+  if(!propsCount)actions.push({text:'Add first property — paste a Rightmove URL in the Parser tab',p:'medium'});
+  if(!data.budget.maxprice)actions.push({text:'Set your budget in the Budget & SDLT tab',p:'medium'});
+  if(!actions.length)actions.push({text:'All key tasks complete — ready to move fast on the right property!',p:'done'});
+  const actionsEl=document.getElementById('next-actions');
+  if(actionsEl)actionsEl.innerHTML=actions.slice(0,5).map(a=>`
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="width:8px;height:8px;border-radius:50%;background:${a.p==='high'?'var(--danger)':a.p==='medium'?'#d48b00':'var(--accent)'};flex-shrink:0;margin-top:5px"></span>
+      <span style="font-size:14px">${a.text}</span>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+document.querySelectorAll('.modal-overlay').forEach(el=>{
+  el.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
+});
+document.getElementById('postcode-input')?.addEventListener('input',function(){this.value=this.value.toUpperCase()});
+renderAll();
+</script>
+</body>
+</html>
