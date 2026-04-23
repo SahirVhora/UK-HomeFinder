@@ -6,6 +6,8 @@
 <title>UK Home Finder Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{
   --bg:#f7f5f0;--surface:#fff;--surface2:#f0ede6;--border:#e2ddd4;--border2:#ccc8be;
@@ -140,13 +142,50 @@ textarea{resize:vertical;min-height:70px}
 .settings-row:last-child{border-bottom:none}
 .settings-label{flex:1;font-size:14px}
 .settings-sub{font-size:12px;color:var(--text3)}
+
+/* MAP */
+#map-container .leaflet-popup-content-wrapper {
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+}
+.map-popup-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.map-popup-meta { color: #666; font-size: 12px; margin-bottom: 6px; }
+.map-popup-score { font-weight: 700; color: var(--accent); }
+
+/* DARK MODE */
+[data-theme="dark"] {
+  --bg: #111;
+  --surface: #1c1c1e;
+  --surface2: #2c2c2e;
+  --border: #3a3a3c;
+  --border2: #4a4a4c;
+  --text: #f0f0f0;
+  --text2: #a0a0a8;
+  --text3: #6e6e76;
+  --shadow: 0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+  --accent-bg: #0d2e1e;
+  --accent-border: #1a5c3a;
+  --warn-bg: #2e1e00;
+  --warn-border: #7a5800;
+  --danger-bg: #2e0d0d;
+  --danger-border: #7a1c1c;
+  --info-bg: #0d1e3a;
+  --info-border: #1a3d6b;
+  --blue-bg: #0d1e3a;
+  --blue-border: #1751a8;
+  --gold-pale: #1e1500;
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">UK Home Finder Hub <span>Schools · Transport · SDLT · Property Tracker</span></div>
-  <button class="btn btn-ghost btn-sm" onclick="openSettings()" style="color:#fff;border-color:rgba(255,255,255,.3)">⚙ Settings</button>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="btn btn-ghost btn-sm" id="theme-toggle" onclick="toggleTheme()" style="color:#fff;border-color:rgba(255,255,255,.3)" aria-label="Toggle dark mode">🌙</button>
+    <button class="btn btn-ghost btn-sm" onclick="openSettings()" style="color:#fff;border-color:rgba(255,255,255,.3)">⚙ Settings</button>
+  </div>
 </header>
 
 <nav>
@@ -155,6 +194,7 @@ textarea{resize:vertical;min-height:70px}
   <button onclick="showSection('properties')">My Properties</button>
   <button onclick="showSection('budget')">Budget & SDLT</button>
   <button onclick="showSection('checklist')">Readiness</button>
+  <button onclick="showSection('map')">Map View</button>
 </nav>
 
 <main>
@@ -233,7 +273,10 @@ textarea{resize:vertical;min-height:70px}
 <div id="section-properties" class="section">
   <div class="section-header">
     <div><div class="section-title">My Properties</div><div class="section-sub">Track, score and compare every listing</div></div>
-    <button class="btn btn-primary" onclick="openAddProperty()">+ Add Property</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()" title="Export all properties to CSV">⬇ Export CSV</button>
+      <button class="btn btn-primary" onclick="openAddProperty()">+ Add Property</button>
+    </div>
   </div>
   <div id="properties-list">
     <div class="empty-state"><div style="font-size:36px">🏡</div><p>No properties tracked yet. Use the Rightmove Parser or add manually.</p></div>
@@ -282,6 +325,31 @@ textarea{resize:vertical;min-height:70px}
     <div class="progress-wrap"><div class="progress-bar" id="checklist-progress-bar" style="width:0%"></div></div>
   </div>
   <div id="checklist-sections"></div>
+</div>
+
+<!-- ═══ MAP VIEW ═══ -->
+<div id="section-map" class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Property Map</div>
+      <div class="section-sub">All tracked properties plotted on an interactive map</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <label for="map-status-filter" style="font-size:13px;color:var(--text2);margin-bottom:0">Filter:</label>
+      <select id="map-status-filter" onchange="renderMap()" class="filt-sel" style="font-size:13px;padding:6px 10px">
+        <option value="all">All Statuses</option>
+        <option value="watching">Watching</option>
+        <option value="viewing-booked">Viewing Booked</option>
+        <option value="viewed">Viewed</option>
+        <option value="offer-pending">Offer Pending</option>
+        <option value="offer-accepted">Offer Accepted</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+  </div>
+  <div id="map-container" style="height:520px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:1.5rem;background:var(--surface2)"></div>
+  <div id="map-legend" style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text2);margin-bottom:1rem"></div>
+  <div id="map-props-summary"></div>
 </div>
 
 </main>
@@ -390,6 +458,24 @@ const SCORE_DIMS=[
   {key:'broadband',  label:'Broadband quality',    weight:0.5},
 ];
 
+const STATUS_LABELS={
+  'watching':'Watching',
+  'viewing-booked':'Viewing Booked',
+  'viewed':'Viewed',
+  'offer-pending':'Offer Pending',
+  'offer-accepted':'Offer Accepted',
+  'rejected':'Rejected',
+};
+
+const STATUS_COLORS={
+  'watching':'#1751a8',
+  'viewing-booked':'#d48b00',
+  'viewed':'#7c3d99',
+  'offer-pending':'#e67e22',
+  'offer-accepted':'#1a5c3a',
+  'rejected':'#8b1c1c',
+};
+
 const CHECKLIST_SECTIONS=[
   {title:'Financial Preparation',items:[
     {id:'aip',text:'Get Mortgage in Principle (AIP)',meta:'Do before serious viewings — makes you a credible buyer'},
@@ -438,9 +524,10 @@ function showSection(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('section-'+id).classList.add('active');
-  const labels={overview:'Overview',parser:'Rightmove',properties:'My Properties',budget:'Budget',checklist:'Readiness'};
+  const labels={overview:'Overview',parser:'Rightmove Parser',properties:'My Properties',budget:'Budget & SDLT',checklist:'Readiness',map:'Map View'};
   [...document.querySelectorAll('nav button')].find(b=>b.textContent.trim()===labels[id])?.classList.add('active');
-  renderAll();
+  if(id==='map')renderMap();
+  else renderAll();
 }
 
 function renderAll(){
@@ -473,6 +560,7 @@ function saveSettings(){
     schoolRadius:parseFloat(document.getElementById('s-school-radius').value),
     trainRadius:parseFloat(document.getElementById('s-train-radius').value),
     busRadius:parseFloat(document.getElementById('s-bus-radius').value),
+    theme:data.settings.theme||'light',
   };
   save();closeSettings();renderAll();
 }
@@ -1477,6 +1565,161 @@ function renderOverview(){
       <span style="font-size:14px">${a.text}</span>
     </div>`).join('');
 }
+
+// ═══════════════════════════════════════════════════════════
+// MAP VIEW
+// ═══════════════════════════════════════════════════════════
+let leafletMap = null;
+let mapMarkers = [];
+const MAP_DEFAULT_CENTER = [52.5, -1.5]; // UK geographic centre
+const MAP_DEFAULT_ZOOM = 7;
+const MAP_RESIZE_DELAY_MS = 100; // Leaflet needs a tick after theme/DOM change to recalculate size
+
+function renderMap() {
+  const statusFilter = document.getElementById('map-status-filter')?.value || 'all';
+
+  if (!leafletMap) {
+    leafletMap = L.map('map-container').setView(MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+      maxZoom: 18,
+    }).addTo(leafletMap);
+  }
+
+  mapMarkers.forEach(m => leafletMap.removeLayer(m));
+  mapMarkers = [];
+
+  const props = data.properties.filter(p => {
+    if (statusFilter !== 'all' && p.status !== statusFilter) return false;
+    return p.intel?.lat != null && p.intel?.lon != null;
+  });
+
+  const noCoords = data.properties.filter(p => !(p.intel?.lat != null && p.intel?.lon != null));
+
+  if (props.length === 0) {
+    document.getElementById('map-props-summary').innerHTML = `
+      <div class="empty-state">
+        <div style="font-size:32px">📍</div>
+        <p>No properties with location data yet.</p>
+        <p style="margin-top:6px;font-size:13px">Run <strong>Area Intelligence</strong> on a property to get its coordinates, then it will appear here.</p>
+      </div>`;
+    document.getElementById('map-legend').innerHTML = '';
+    return;
+  }
+
+  const bounds = [];
+  props.forEach(p => {
+    const score = calcCompositeScore(p.scores);
+    const color = STATUS_COLORS[p.status] || '#666';
+
+    const svgIcon = L.divIcon({
+      className: '',
+      html: `<div style="background:${color};color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)">${Math.round(score)}</div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    });
+
+    const sdlt = calcSDLTForAmount(p.price || 0, data.budget.ftb !== 0);
+
+    const marker = L.marker([p.intel.lat, p.intel.lon], { icon: svgIcon })
+      .bindPopup(`
+        <div class="map-popup-title">${p.address || 'Unknown address'}</div>
+        <div class="map-popup-meta">
+          ${p.postcode || ''} · ${p.beds ? p.beds + ' bed' : ''}<br>
+          £${(p.price || 0).toLocaleString()} · SDLT: £${Math.round(sdlt.tax).toLocaleString()}
+        </div>
+        <div><span class="badge badge-gray">${STATUS_LABELS[p.status] || p.status}</span></div>
+        <div style="margin-top:8px" class="map-popup-score">Score: ${Math.round(score)} / 100</div>
+        ${p.url ? `<div style="margin-top:8px"><a href="${p.url}" target="_blank" style="color:#1751a8;font-size:12px">View listing ↗</a></div>` : ''}
+      `);
+
+    marker.addTo(leafletMap);
+    mapMarkers.push(marker);
+    bounds.push([p.intel.lat, p.intel.lon]);
+  });
+
+  if (bounds.length > 0) {
+    if (bounds.length === 1) {
+      leafletMap.setView(bounds[0], 14);
+    } else {
+      leafletMap.fitBounds(bounds, { padding: [40, 40] });
+    }
+  }
+
+  const usedStatuses = [...new Set(props.map(p => p.status))];
+  const legendItems = usedStatuses.map(s => `
+    <div style="display:flex;align-items:center;gap:6px">
+      <div style="width:14px;height:14px;border-radius:50%;background:${STATUS_COLORS[s]||'#666'}"></div>
+      <span>${STATUS_LABELS[s] || s}</span>
+    </div>`).join('');
+  const noDataNote = noCoords.length > 0
+    ? `<span style="color:var(--text3)">· ${noCoords.length} propert${noCoords.length>1?'ies':'y'} without area data (run Area Intelligence first)</span>`
+    : '';
+  document.getElementById('map-legend').innerHTML = legendItems + noDataNote;
+
+  document.getElementById('map-props-summary').innerHTML = `<div class="alert alert-info">${props.length} propert${props.length!==1?'ies':'y'} shown on map. Circle numbers = composite score out of 100.</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════════════════════
+function exportCSV() {
+  if (!data.properties.length) { alert('No properties to export.'); return; }
+  const headers = ['Address','Postcode','Price (£)','Beds','Status','Score /100','SDLT (£)','Schools Score','Transport Score','Listing URL','Viewing Date','Offer (£)','Chain'];
+  const ftb = data.budget.ftb !== 0;
+  const rows = data.properties.map(p => {
+    const score = calcCompositeScore(p.scores);
+    const sdlt = calcSDLTForAmount(p.price || 0, ftb);
+    return [
+      p.address || '',
+      p.postcode || '',
+      p.price || '',
+      p.beds || '',
+      STATUS_LABELS[p.status] || p.status || '',
+      score,
+      Math.round(sdlt.tax),
+      p.scores?.schools ?? '',
+      p.scores?.transport ?? '',
+      p.url || '',
+      p.notes?.viewingDate || '',
+      p.offer || '',
+      p.chain || '',
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+  });
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `uk-home-finder-export-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+// DARK MODE
+// ═══════════════════════════════════════════════════════════
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  const btn = document.getElementById('theme-toggle');
+  btn.textContent = next === 'dark' ? '☀️' : '🌙';
+  btn.setAttribute('aria-label', next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  data.settings.theme = next;
+  save();
+  if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), MAP_RESIZE_DELAY_MS);
+}
+
+(function applyTheme() {
+  const theme = data.settings?.theme || 'light';
+  if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+      btn.textContent = '☀️';
+      btn.setAttribute('aria-label', 'Switch to light mode');
+    }
+  }
+})();
 
 // ═══════════════════════════════════════════════════════════
 // INIT
