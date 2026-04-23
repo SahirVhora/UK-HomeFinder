@@ -335,6 +335,7 @@ textarea{resize:vertical;min-height:70px}
       <div class="section-sub">All tracked properties plotted on an interactive map</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center">
+      <label for="map-status-filter" style="font-size:13px;color:var(--text2);margin-bottom:0">Filter:</label>
       <select id="map-status-filter" onchange="renderMap()" class="filt-sel" style="font-size:13px;padding:6px 10px">
         <option value="all">All Statuses</option>
         <option value="watching">Watching</option>
@@ -1587,10 +1588,10 @@ function renderMap() {
 
   const props = data.properties.filter(p => {
     if (statusFilter !== 'all' && p.status !== statusFilter) return false;
-    return p.intel?.lat && p.intel?.lon;
+    return p.intel?.lat != null && p.intel?.lon != null;
   });
 
-  const noCoords = data.properties.filter(p => !p.intel?.lat && !p.intel?.lon);
+  const noCoords = data.properties.filter(p => !(p.intel?.lat != null && p.intel?.lon != null));
 
   if (props.length === 0) {
     document.getElementById('map-props-summary').innerHTML = `
@@ -1693,10 +1694,12 @@ function toggleTheme() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const next = isDark ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
-  document.getElementById('theme-toggle').textContent = next === 'dark' ? '☀️' : '🌙';
+  const btn = document.getElementById('theme-toggle');
+  btn.textContent = next === 'dark' ? '☀️' : '🌙';
+  btn.setAttribute('aria-label', next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
   data.settings.theme = next;
   save();
-  if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), 100);
+  if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), 100); // Leaflet needs resize after layout shift
 }
 
 (function applyTheme() {
@@ -1704,7 +1707,10 @@ function toggleTheme() {
   if (theme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
     const btn = document.getElementById('theme-toggle');
-    if (btn) btn.textContent = '☀️';
+    if (btn) {
+      btn.textContent = '☀️';
+      btn.setAttribute('aria-label', 'Switch to light mode');
+    }
   }
 })();
 
