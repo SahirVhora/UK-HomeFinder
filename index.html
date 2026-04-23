@@ -1571,12 +1571,15 @@ function renderOverview(){
 // ═══════════════════════════════════════════════════════════
 let leafletMap = null;
 let mapMarkers = [];
+const MAP_DEFAULT_CENTER = [52.5, -1.5]; // UK geographic centre
+const MAP_DEFAULT_ZOOM = 7;
+const MAP_RESIZE_DELAY_MS = 100; // Leaflet needs a tick after theme/DOM change to recalculate size
 
 function renderMap() {
   const statusFilter = document.getElementById('map-status-filter')?.value || 'all';
 
   if (!leafletMap) {
-    leafletMap = L.map('map-container').setView([52.5, -1.5], 7);
+    leafletMap = L.map('map-container').setView(MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
       maxZoom: 18,
@@ -1644,11 +1647,15 @@ function renderMap() {
   }
 
   const usedStatuses = [...new Set(props.map(p => p.status))];
-  document.getElementById('map-legend').innerHTML = usedStatuses.map(s => `
+  const legendItems = usedStatuses.map(s => `
     <div style="display:flex;align-items:center;gap:6px">
       <div style="width:14px;height:14px;border-radius:50%;background:${STATUS_COLORS[s]||'#666'}"></div>
       <span>${STATUS_LABELS[s] || s}</span>
-    </div>`).join('') + (noCoords.length > 0 ? `<span style="color:var(--text3)">· ${noCoords.length} propert${noCoords.length>1?'ies':'y'} without area data (run Area Intelligence first)</span>` : '');
+    </div>`).join('');
+  const noDataNote = noCoords.length > 0
+    ? `<span style="color:var(--text3)">· ${noCoords.length} propert${noCoords.length>1?'ies':'y'} without area data (run Area Intelligence first)</span>`
+    : '';
+  document.getElementById('map-legend').innerHTML = legendItems + noDataNote;
 
   document.getElementById('map-props-summary').innerHTML = `<div class="alert alert-info">${props.length} propert${props.length!==1?'ies':'y'} shown on map. Circle numbers = composite score out of 100.</div>`;
 }
@@ -1699,7 +1706,7 @@ function toggleTheme() {
   btn.setAttribute('aria-label', next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
   data.settings.theme = next;
   save();
-  if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), 100); // Leaflet needs resize after layout shift
+  if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), MAP_RESIZE_DELAY_MS);
 }
 
 (function applyTheme() {
