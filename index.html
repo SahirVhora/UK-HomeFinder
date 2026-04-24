@@ -275,6 +275,7 @@ textarea{resize:vertical;min-height:70px}
     <div><div class="section-title">My Properties</div><div class="section-sub">Track, score and compare every listing</div></div>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="btn btn-ghost btn-sm" onclick="exportCSV()" title="Export all properties to CSV">⬇ Export CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportProperties()" title="Export as JSON">⬇ JSON</button>
       <button class="btn btn-primary" onclick="openAddProperty()">+ Add Property</button>
     </div>
   </div>
@@ -516,6 +517,15 @@ let editingPropIdx=-1;
 let lastIntelData=null;
 
 function save(){localStorage.setItem('uk-home-hub',JSON.stringify(data))}
+function exportProperties(){
+  const props=(data.properties||[]);
+  if(!props.length){alert('No saved properties to export.');return;}
+  const blob=new Blob([JSON.stringify(props,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='my-properties-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(url);
+}
 
 // ═══════════════════════════════════════════════════════════
 // NAVIGATION
@@ -1113,12 +1123,12 @@ function calcSDLTForAmount(price,ftb=true){
     return{tax,breakdown:bkd};
   }
   if(ftb){
-    if(price<=300000)return{tax:0,breakdown:[{band:'Up to £300,000',rate:'0%',amount:0}]};
-    if(price<=500000){
-      const tax=(price-300000)*0.05;
-      return{tax,breakdown:[{band:'£0–£300,000',rate:'0% (FTB)',amount:0},{band:`£300,001–£${price.toLocaleString()}`,rate:'5%',amount:tax}]};
+    if(price<=425000)return{tax:0,breakdown:[{band:'Up to £425,000',rate:'0% (FTB)',amount:0}]};
+    if(price<=625000){
+      const tax=(price-425000)*0.05;
+      return{tax,breakdown:[{band:'£0–£425,000',rate:'0% (FTB)',amount:0},{band:`£425,001–£${price.toLocaleString()}`,rate:'5%',amount:tax}]};
     }
-    // Above £500k — FTB relief doesn't apply, use standard rates
+    // Above £625k — FTB relief fully withdrawn, use standard rates
     return applySlabs(price,stdSlabs);
   }
   return applySlabs(price,stdSlabs);
@@ -1133,7 +1143,7 @@ function calcSDLT(){
   el.innerHTML=`<div class="sdlt-result">
     ${breakdown.map(b=>`<div class="sdlt-row"><span>${b.band}</span><span>${b.rate} = £${Math.round(b.amount).toLocaleString()}</span></div>`).join('')}
     <div class="sdlt-row sdlt-total"><span>Total SDLT</span><span style="color:var(--accent)">£${Math.round(tax).toLocaleString()}</span></div>
-    ${price>500000&&ftb?'<div style="font-size:12px;color:var(--warn);margin-top:6px">Above £500k — FTB relief does not apply. Standard rates on full amount.</div>':''}
+    ${price>625000&&ftb?'<div style="font-size:12px;color:var(--warn);margin-top:6px">Above £625,000 — FTB relief fully withdrawn. Standard rates apply on the full amount.</div>':''}
   </div>`;
 }
 
@@ -1145,7 +1155,7 @@ function updatePropSDLT(){
   const{tax}=calcSDLTForAmount(price,ftb);
   el.innerHTML=`<div class="alert ${price>500000&&ftb?'alert-warn':'alert-success'}" style="margin-top:8px">
     SDLT: <strong>£${Math.round(tax).toLocaleString()}</strong>
-    ${price>500000&&ftb?' — FTB relief does not apply above £500k':''}
+    ${price>625000&&ftb?' — FTB relief fully withdrawn above £625k':''}
     ${price<=300000&&ftb?' — No SDLT as FTB':''}
   </div>`;
 }
