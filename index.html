@@ -252,7 +252,7 @@ textarea{resize:vertical;min-height:70px}
 
   <!-- MANUAL POSTCODE LOOKUP -->
   <div class="card" style="margin-bottom:1rem">
-    <div class="card-title">Or — Enter Postcode Directly</div>
+    <div class="card-title">Or - Enter Postcode Directly</div>
     <div class="flex-row">
       <input type="text" id="postcode-input" placeholder="e.g. B90 2QS or SW1A 1AA" style="max-width:200px;text-transform:uppercase">
       <select id="school-type-filter" style="max-width:200px">
@@ -306,7 +306,7 @@ textarea{resize:vertical;min-height:70px}
   <div class="grid-2">
     <div class="card">
       <div class="card-title">Your Budget</div>
-      <div class="form-row"><label>First-time buyer?</label><select id="b-ftb" onchange="calcBudget()"><option value="1">Yes — first-time buyer</option><option value="0">No — previous owner</option></select></div>
+      <div class="form-row"><label>First-time buyer?</label><select id="b-ftb" onchange="calcBudget()"><option value="1">Yes - first-time buyer</option><option value="0">No - previous owner</option></select></div>
       <div class="form-row"><label>Deposit saved (£)</label><input type="number" id="b-deposit" placeholder="80000" oninput="calcBudget()"></div>
       <div class="form-row"><label>Max property price (£)</label><input type="number" id="b-maxprice" placeholder="540000" oninput="calcBudget()"></div>
       <div class="form-row"><label>Solicitor / conveyancing (£)</label><input type="number" id="b-solicitor" placeholder="2500" oninput="calcBudget()"></div>
@@ -441,7 +441,7 @@ textarea{resize:vertical;min-height:70px}
 <div class="modal-overlay" id="settings-modal">
 <div class="modal">
   <div class="modal-title">Settings</div>
-  <div class="form-row"><label>Your name / search label</label><input type="text" id="s-name" placeholder="e.g. Sahir — Solihull Search 2026"></div>
+  <div class="form-row"><label>Your name / search label</label><input type="text" id="s-name" placeholder="e.g. Sahir - Solihull Search 2026"></div>
   <div class="form-row"><label>Target postcode area</label><input type="text" id="s-area" placeholder="e.g. B90, B91"></div>
   <div class="form-row"><label>Priority school name <span style="font-weight:400;color:var(--text3)">(appears in scoring labels)</span></label><input type="text" id="s-school" placeholder="e.g. Tudor Grange Academy"></div>
   <div class="form-row"><label>School search radius</label>
@@ -495,7 +495,7 @@ const STATUS_COLORS={
 
 const CHECKLIST_SECTIONS=[
   {title:'Financial Preparation',items:[
-    {id:'aip',text:'Get Mortgage in Principle (AIP)',meta:'Do before serious viewings — makes you a credible buyer'},
+    {id:'aip',text:'Get Mortgage in Principle (AIP)',meta:'Do before serious viewings - makes you a credible buyer'},
     {id:'deposit',text:'Deposit saved and in accessible account',meta:'Lender will want evidence of source'},
     {id:'payslips',text:'3 months payslips compiled'},
     {id:'bankstat',text:'3 months bank statements prepared'},
@@ -747,8 +747,8 @@ async function parseURL(){
   if(postcode){
     document.getElementById('postcode-input').value=postcode;
     resultEl.innerHTML=`<div style="margin-bottom:8px">${chips}</div>
-      <div style="color:var(--accent);font-size:13px">✓ Postcode <strong>${postcode}</strong> found — running area intelligence…</div>
-      ${!details?'<div style="font-size:12px;color:var(--text3);margin-top:4px">Listing details unavailable — please fill address, price & beds manually.</div>':''}`;
+      <div style="color:var(--accent);font-size:13px">✓ Postcode <strong>${postcode}</strong> found - running area intelligence…</div>
+      ${!details?'<div style="font-size:12px;color:var(--text3);margin-top:4px">Listing details unavailable - please fill address, price & beds manually.</div>':''}`;
     runAreaIntel(postcode);
   } else {
     resultEl.innerHTML=`<div style="margin-bottom:10px">${chips}</div>
@@ -772,7 +772,7 @@ function useInlinePostcode(){
   document.getElementById('postcode-input').value=pc;
   const resultEl=document.getElementById('parse-result');
   resultEl.innerHTML=resultEl.innerHTML.replace(/<div style="display:flex.*<\/div>/s,
-    `<div style="color:var(--accent);font-size:13px;margin-top:8px">✓ Using postcode <strong>${pc}</strong> — running area intelligence…</div>`);
+    `<div style="color:var(--accent);font-size:13px;margin-top:8px">✓ Using postcode <strong>${pc}</strong> - running area intelligence…</div>`);
   runAreaIntel(pc);
 }
 
@@ -782,7 +782,7 @@ function updateAtSDLT(){
   if(!price){el.innerHTML='';return;}
   const ftb=data.budget.ftb!==0;
   const {tax}=calcSDLTForAmount(price,ftb);
-  el.innerHTML=`<div class="alert alert-${price>500000?'warn':'success'}" style="margin-top:8px">SDLT: £${Math.round(tax).toLocaleString()}${price>500000&&ftb?' — above £500k, FTB relief does not apply':''}</div>`;
+  el.innerHTML=`<div class="alert alert-${price>500000?'warn':'success'}" style="margin-top:8px">SDLT: £${Math.round(tax).toLocaleString()}${price>500000&&ftb?' - above £500k, FTB relief does not apply':''}</div>`;
 }
 
 function addFromParser(){
@@ -833,7 +833,7 @@ async function runAreaIntel(postcodeOverride){
     const tr=data.settings.trainRadius||1.5;
     const br=data.settings.busRadius||0.5;
 
-    // 2. Sequential: schools then transport — avoids hammering Overpass simultaneously
+    // 2. Sequential: schools then transport - avoids hammering Overpass simultaneously
     resultsEl.innerHTML=`<div class="alert alert-info" id="intel-status">Fetching schools…</div>`;
     const schoolTypeFilter=document.getElementById('school-type-filter')?.value||'all';
     let schools,transport;
@@ -863,7 +863,7 @@ async function runAreaIntel(postcodeOverride){
     if(schools.length===0&&transport.stations.length===0&&transport.busstops.length===0){
       resultsEl.insertAdjacentHTML('afterbegin',
         `<div class="alert alert-warn" style="margin-bottom:1rem">
-          ⚠ Overpass API returned no data — it may be temporarily overloaded.
+          ⚠ Overpass API returned no data - it may be temporarily overloaded.
           <button class="btn btn-ghost btn-sm" style="margin-left:8px" onclick="runAreaIntel('${postcode}')">Retry</button>
         </div>`);
     } else if(schools.length===0){
@@ -1037,7 +1037,7 @@ function renderAreaIntel(intel,container,sr,tr,br){
       No schools found via OpenStreetMap within ${sr} miles of ${intel.postcode}.
       OSM coverage is excellent for UK schools but some may be unmapped.
       <br><br>
-      <a href="https://www.locrating.com/#q=${encodeURIComponent(intel.postcode)}" target="_blank" style="color:var(--blue)">Check Locrating ↗</a> · 
+      <a href="https://www.locrating.com/#q=${encodeURIComponent(intel.postcode)}" target="_blank" style="color:var(--blue)">Check Locrating ↗</a> ·
       <a href="https://get-information-schools.service.gov.uk/Search?SearchType=Location&LocationSearchModel.AutoSuggestValue=${encodeURIComponent(intel.postcode)}&LocationSearchModel.RadiusInMiles=${sr}" target="_blank" style="color:var(--blue)">DfE Schools search ↗</a>
     </div>`:
     intel.schools.map(s=>{
@@ -1102,7 +1102,7 @@ function renderAreaIntel(intel,container,sr,tr,br){
       <div class="grid-2">
         <div>
           <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:10px">
-            Schools within ${sr} miles — ${intel.secondarySchools} secondary · ${intel.primarySchools} primary
+            Schools within ${sr} miles - ${intel.secondarySchools} secondary · ${intel.primarySchools} primary
           </div>
           <div style="font-size:12px;color:var(--info);background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:6px;padding:8px;margin-bottom:10px">
             Ofsted ratings are no longer available via the DfE API (removed Jan 2025). Click each school's "Ofsted report ↗" link for the latest rating. For catchment maps, use your <strong>Locrating</strong> subscription.
@@ -1133,7 +1133,7 @@ function renderAreaIntel(intel,container,sr,tr,br){
 // SDLT
 // ═══════════════════════════════════════════════════════════
 const SDLT = {
-  // Rates last updated: April 2025 — verify at https://www.gov.uk/stamp-duty-land-tax
+  // Rates last updated: April 2025 - verify at https://www.gov.uk/stamp-duty-land-tax
   standard: [ [0,125000,0.00],[125001,250000,0.02],[250001,925000,0.05],[925001,1500000,0.10],[1500001,Infinity,0.12] ],
   ftbFreeThreshold: 425000,   // 0% up to this
   ftbReliefCeiling: 625000,   // relief fully withdrawn above this
@@ -1159,7 +1159,7 @@ function calcSDLTForAmount(price,ftb=true){
       const tax=(price-SDLT.ftbFreeThreshold)*SDLT.ftbTopRate;
       return{tax,breakdown:[{band:`£0–£${SDLT.ftbFreeThreshold.toLocaleString()}`,rate:'0% (FTB)',amount:0},{band:`£${SDLT.ftbFreeThreshold.toLocaleString()}–£${price.toLocaleString()}`,rate:`${(SDLT.ftbTopRate*100).toFixed(0)}%`,amount:tax}]};
     }
-    // Above ftbReliefCeiling — FTB relief fully withdrawn, use standard rates
+    // Above ftbReliefCeiling - FTB relief fully withdrawn, use standard rates
     return applySlabs(price,SDLT.standard);
   }
   return applySlabs(price,SDLT.standard);
@@ -1174,8 +1174,8 @@ function calcSDLT(){
   el.innerHTML=`<div class="sdlt-result">
     ${breakdown.map(b=>`<div class="sdlt-row"><span>${b.band}</span><span>${b.rate} = £${Math.round(b.amount).toLocaleString()}</span></div>`).join('')}
     <div class="sdlt-row sdlt-total"><span>Total SDLT</span><span style="color:var(--accent)">£${Math.round(tax).toLocaleString()}</span></div>
-    ${price>SDLT.ftbReliefCeiling&&ftb?'<div style="font-size:12px;color:var(--warn);margin-top:6px">Above £'+SDLT.ftbReliefCeiling.toLocaleString()+' — FTB relief fully withdrawn. Standard rates apply on the full amount.</div>':''}
-    <div style="font-size:11px;color:var(--text3);margin-top:8px">Rates from April 2025 — verify at <a href="https://www.gov.uk/stamp-duty-land-tax" target="_blank" style="color:var(--text3)">gov.uk/stamp-duty-land-tax</a></div>
+    ${price>SDLT.ftbReliefCeiling&&ftb?'<div style="font-size:12px;color:var(--warn);margin-top:6px">Above £'+SDLT.ftbReliefCeiling.toLocaleString()+' - FTB relief fully withdrawn. Standard rates apply on the full amount.</div>':''}
+    <div style="font-size:11px;color:var(--text3);margin-top:8px">Rates from April 2025 - verify at <a href="https://www.gov.uk/stamp-duty-land-tax" target="_blank" style="color:var(--text3)">gov.uk/stamp-duty-land-tax</a></div>
   </div>`;
 }
 
@@ -1187,8 +1187,8 @@ function updatePropSDLT(){
   const{tax}=calcSDLTForAmount(price,ftb);
   el.innerHTML=`<div class="alert ${price>500000&&ftb?'alert-warn':'alert-success'}" style="margin-top:8px">
     SDLT: <strong>£${Math.round(tax).toLocaleString()}</strong>
-    ${price>SDLT.ftbReliefCeiling&&ftb?' — FTB relief fully withdrawn above £'+SDLT.ftbReliefCeiling.toLocaleString():''}
-    ${price<=SDLT.ftbFreeThreshold&&ftb?' — No SDLT as FTB':''}
+    ${price>SDLT.ftbReliefCeiling&&ftb?' - FTB relief fully withdrawn above £'+SDLT.ftbReliefCeiling.toLocaleString():''}
+    ${price<=SDLT.ftbFreeThreshold&&ftb?' - No SDLT as FTB':''}
   </div>`;
 }
 
@@ -1350,7 +1350,7 @@ async function runIntelForProp(){
     curScores.transport=intel.transportScore;
     initScoreSliders(curScores);
     const partialWarn=intel.numSchools===0&&intel.numStations===0
-      ?`<div class="alert alert-warn" style="margin-top:6px">⚠ Overpass returned no data — scores may be inaccurate. <button class="btn btn-ghost btn-sm" onclick="runIntelForProp()">Retry</button></div>`:'';
+      ?`<div class="alert alert-warn" style="margin-top:6px">⚠ Overpass returned no data - scores may be inaccurate. <button class="btn btn-ghost btn-sm" onclick="runIntelForProp()">Retry</button></div>`:'';
     el.innerHTML=`<div class="alert alert-success">
       Area score: <strong>${intel.areaScore}/10</strong> ·
       ${intel.numSchools} schools (${sr}mi) ·
@@ -1553,8 +1553,8 @@ function renderOverview(){
   if(statsEl)statsEl.innerHTML=`
     <div class="stat-card ${pct>=75?'green':pct>=40?'warn':'danger'}"><div class="stat-label">Readiness</div><div class="stat-value">${pct}%</div><div class="stat-sub">${totalDone}/${totalItems} tasks</div></div>
     <div class="stat-card"><div class="stat-label">Properties</div><div class="stat-value">${propsCount}</div><div class="stat-sub">${data.properties.filter(p=>p.intel).length} with area data</div></div>
-    <div class="stat-card ${topScore>=70?'green':topScore>=50?'warn':''}"><div class="stat-label">Top Score</div><div class="stat-value">${topScore||'—'}</div><div class="stat-sub">${topProp?topProp.address?.split(',')[0]:'No properties'}</div></div>
-    <div class="stat-card info"><div class="stat-label">Avg Area Score</div><div class="stat-value">${avgAreaScore||'—'}</div><div class="stat-sub">${data.budget.maxprice?'Budget: £'+(data.budget.maxprice/1000).toFixed(0)+'k':s.area||'Set budget'}</div></div>`;
+    <div class="stat-card ${topScore>=70?'green':topScore>=50?'warn':''}"><div class="stat-label">Top Score</div><div class="stat-value">${topScore||' - '}</div><div class="stat-sub">${topProp?topProp.address?.split(',')[0]:'No properties'}</div></div>
+    <div class="stat-card info"><div class="stat-label">Avg Area Score</div><div class="stat-value">${avgAreaScore||' - '}</div><div class="stat-sub">${data.budget.maxprice?'Budget: £'+(data.budget.maxprice/1000).toFixed(0)+'k':s.area||'Set budget'}</div></div>`;
 
   const stages=[
     {label:'Financial prep',done:['aip','deposit','payslips','bankstat'].filter(i=>data.checklist[i]).length,total:4},
@@ -1585,7 +1585,7 @@ function renderOverview(){
             <div style="font-size:12px;color:var(--text2)">${p.postcode||''}${p.intel?' · Area: '+p.intel.areaScore+'/10':''}</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:14px;font-weight:600;color:var(--accent)">£${p.price?(p.price/1000).toFixed(0)+'k':'—'}</div>
+            <div style="font-size:14px;font-weight:600;color:var(--accent)">£${p.price?(p.price/1000).toFixed(0)+'k':' - '}</div>
             <div style="font-size:12px;color:var(--text3)">Score: ${score}</div>
           </div>
         </div>`;
@@ -1595,11 +1595,11 @@ function renderOverview(){
 
   const actions=[];
   if(!data.checklist['aip'])actions.push({text:'Get your Mortgage in Principle (AIP)',p:'high'});
-  if(!data.checklist['schools-checked'])actions.push({text:'Run area intelligence for target postcodes — check school quality',p:'high'});
+  if(!data.checklist['schools-checked'])actions.push({text:'Run area intelligence for target postcodes - check school quality',p:'high'});
   if(!data.checklist['solicitor-shortlist'])actions.push({text:'Shortlist 2–3 conveyancing solicitors',p:'medium'});
-  if(!propsCount)actions.push({text:'Add first property — paste a Rightmove URL in the Parser tab',p:'medium'});
+  if(!propsCount)actions.push({text:'Add first property - paste a Rightmove URL in the Parser tab',p:'medium'});
   if(!data.budget.maxprice)actions.push({text:'Set your budget in the Budget & SDLT tab',p:'medium'});
-  if(!actions.length)actions.push({text:'All key tasks complete — ready to move fast on the right property!',p:'done'});
+  if(!actions.length)actions.push({text:'All key tasks complete - ready to move fast on the right property!',p:'done'});
   const actionsEl=document.getElementById('next-actions');
   if(actionsEl)actionsEl.innerHTML=actions.slice(0,5).map(a=>`
     <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
@@ -1810,7 +1810,7 @@ document.getElementById('postcode-input')?.addEventListener('input',function(){t
 renderAll();
 </script>
   <div style="text-align:center;padding:12px 20px;background:var(--surface);border-top:1px solid var(--border);margin-top:20px;font-size:13px;color:var(--text3)">
-    🏠 <b>Researching an area?</b> Check postcode data at 
+    🏠 <b>Researching an area?</b> Check postcode data at
     <a href="https://sahirvhora.github.io/PropertyPulse-UK/" style="color:var(--blue);font-weight:600">PropertyPulse UK →</a>
   </div>
 </body>

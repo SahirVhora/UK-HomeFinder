@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Toolkit](https://img.shields.io/badge/part%20of-UK%20Property%20Toolkit-blue)](https://github.com/SahirVhora?tab=repositories&q=uk-property+OR+PropertyPulse+OR+HomeFinder+OR+postcode-checker)
 
-Part of the **[UK Property Toolkit](https://github.com/SahirVhora?tab=repositories&q=uk-property+OR+PropertyPulse+OR+HomeFinder+OR+postcode-checker)** — three free tools for UK home buyers.
+Part of the **[UK Property Toolkit](https://github.com/SahirVhora?tab=repositories&q=uk-property+OR+PropertyPulse+OR+HomeFinder+OR+postcode-checker)** - three free tools for UK home buyers.
 
 | Tool | Purpose | Best For |
 |---|---|---|
@@ -23,7 +23,7 @@ Five tools in one `index.html`:
 
 | Tab | Purpose |
 |---|---|
-| **Overview** | Dashboard — readiness score, top properties, next actions |
+| **Overview** | Dashboard - readiness score, top properties, next actions |
 | **Rightmove Parser** | Paste listing URL → extracts postcode → fetches area intelligence |
 | **My Properties** | Track, score, and compare listings with notes and offer strategy |
 | **Budget & SDLT** | Full purchase cost calculator with FTB SDLT rules (April 2025) |
@@ -35,18 +35,18 @@ Five tools in one `index.html`:
 
 Fetches three free APIs in parallel when you search a postcode:
 
-### Schools — DfE GIAS API
+### Schools - DfE GIAS API
 - All schools within configurable radius (default 2 miles)
 - Filter by All / Secondary / Primary
 - Direct link to each school's Ofsted inspection report
 - Auto-scores the *School Quality* dimension
 
-### Transport — Overpass API (OpenStreetMap)
+### Transport - Overpass API (OpenStreetMap)
 - Train stations within radius (default 1.5 miles)
 - Bus stops within radius (default 0.5 miles), with route references
 - Auto-scores the *Transport Links* dimension
 
-### Postcode Lookup — postcodes.io
+### Postcode Lookup - postcodes.io
 - Converts postcode to lat/lon, district, and region
 
 All three APIs are free with no API key required.
@@ -92,7 +92,7 @@ cd UK-HomeFinder
 open index.html
 ```
 
-No server, no build step. Data saved to localStorage — nothing sent to any server.
+No server, no build step. Data saved to localStorage - nothing sent to any server.
 
 ---
 
@@ -108,14 +108,14 @@ No server, no build step. Data saved to localStorage — nothing sent to any ser
 
 ## 🔗 Also in the UK Property Toolkit
 
-- **[PropertyPulse-UK](https://github.com/SahirVhora/PropertyPulse-UK)** — Deep area intelligence: crime trends, flood risk, air quality, schools, composite scoring with interactive map
-- **[uk-postcode-checker](https://github.com/SahirVhora/uk-postcode-checker)** — Fast demographics: census charts (ethnicity, religion, tenure), crime stats, schools, transport
+- **[PropertyPulse-UK](https://github.com/SahirVhora/PropertyPulse-UK)** - Deep area intelligence: crime trends, flood risk, air quality, schools, composite scoring with interactive map
+- **[uk-postcode-checker](https://github.com/SahirVhora/uk-postcode-checker)** - Fast demographics: census charts (ethnicity, religion, tenure), crime stats, schools, transport
 
 ---
 
 ## Licence
 
-MIT — see [LICENSE](LICENSE)
+MIT - see [LICENSE](LICENSE)
 
 ## Buyer Pack Export
 
