@@ -116,3 +116,7 @@ No server, no build step. Data saved to localStorage — nothing sent to any ser
 ## Licence
 
 MIT — see [LICENSE](LICENSE)
+
+## Buyer Pack Export
+
+The Overview tab now includes a **Buyer Pack** export. It downloads a plain-text summary of the current budget, readiness checklist progress, top properties, SDLT estimates, scores, and offer notes so buyers can share a compact decision pack with family, advisers, or brokers.
