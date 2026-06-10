@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mortgage Watch - UK Home Intelligence Pro</title>
+<meta name="description" content="Mortgage Watch for UK Home Intelligence Pro: lender rates, two-year cost, and lock or wait signal for home buyers.">
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#111827;--panel2:#172033;--line:#263246;--text:#e5e7eb;--muted:#94a3b8;--blue:#60a5fa;--green:#34d399;--gold:#fbbf24;--red:#fb7185;--cyan:#22d3ee}
+*{box-sizing:border-box}body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);margin:0;padding:24px;line-height:1.45}.wrap{max-width:1240px;margin:0 auto}.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px}h1{margin:0;font-size:30px;letter-spacing:0}h2{font-size:16px;margin:0 0 10px}.muted{color:var(--muted)}a{color:var(--blue);text-decoration:none}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.pill{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 10px;color:var(--muted);font-size:13px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:18px 0}.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;min-height:92px}.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.value{font-size:25px;font-weight:800;margin-top:4px}.sub{font-size:13px;color:var(--muted);margin-top:3px}.green{color:var(--green)}.gold{color:var(--gold)}.red{color:var(--red)}.blue{color:var(--blue)}.grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.65fr);gap:14px;align-items:start}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}.chart-wrap{height:430px}.small-chart{height:190px}canvas{width:100%;height:100%;display:block;background:var(--panel2);border:1px solid var(--line);border-radius:8px}.decision{display:grid;gap:10px}.decision .big{font-size:24px;font-weight:800}.meter{height:10px;background:#0f172a;border:1px solid var(--line);border-radius:999px;overflow:hidden}.meter span{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--gold),var(--red))}.table{overflow:auto;margin-top:14px}table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;white-space:nowrap}th{color:var(--muted);font-weight:700}tr.best-week td{background:rgba(52,211,153,.08)}.warn{color:var(--gold)}.callout{border:1px solid #315075;background:#10223a;border-radius:8px;padding:12px 14px;color:#c7d8f7;font-size:14px;margin:14px 0}@media (max-width:860px){body{padding:14px}.grid{grid-template-columns:1fr}.chart-wrap{height:360px}h1{font-size:24px}.value{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Mortgage Watch</h1>
+      <div class="muted">UK Home Intelligence Pro module for rates, lender behaviour, two-year cost, and lock timing.</div>
+    </div>
+    <div class="actions">
+      <span id="status" class="pill">Loading history...</span>
+      <a class="pill" href="./index.html">Command Centre</a>
+      <a class="pill" href="./docs/uk-home-intelligence-pro.md">Merge blueprint</a>
+    </div>
+  </div>
+
+  <div class="callout">This module is the first migrated slice from <code>uk-mortgage-rate-monitor</code>. It uses committed local data for now; the next step is wiring its decision signal into the main buyer dashboard and affordability calculator.</div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Rate History</h2>
+      <div class="chart-wrap"><canvas id="rateChart" width="1100" height="430" aria-label="Mortgage rate history"></canvas></div>
+    </section>
+
+    <aside class="panel decision">
+      <h2>Decision Signal</h2>
+      <div class="big" id="lockSignal">--</div>
+      <div class="muted" id="bestWeekSignal">Calculating best-week window...</div>
+      <div class="meter" aria-hidden="true"><span id="riskMeter" style="width:0%"></span></div>
+      <div id="decisionReasons" class="muted"></div>
+      <div class="small-chart"><canvas id="spreadChart" width="520" height="190" aria-label="Lender spread chart"></canvas></div>
+    </aside>
+  </div>
+
+  <section class="panel" style="margin-top:14px">
+    <h2>Recent History</h2>
+    <div class="table">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Best</th><th>Lender</th><th>2y cost</th><th>Halifax</th><th>NatWest</th><th>Barclays</th><th>Lloyds</th><th>Swap</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+const LOAN_AMOUNT=312000,TERM_YEARS=25,LENDERS=["halifax","natwest","barclays","lloyds"],COLORS={best_rate:"#60a5fa",halifax:"#fbbf24",natwest:"#34d399",barclays:"#fb7185",lloyds:"#22d3ee",swap_2y:"#a78bfa"};
+function parseCSV(text){const rows=[],lines=text.trim().split(/\r?\n/);if(!lines.length)return rows;const headers=splitCSV(lines.shift());for(const line of lines){if(!line.trim())continue;const cols=splitCSV(line);rows.push(Object.fromEntries(headers.map((h,i)=>[h,cols[i]||""])))}return rows}
+function splitCSV(line){const out=[];let cur="",q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'&&line[i+1]==='"'){cur+='"';i++;continue}if(ch==='"'){q=!q;continue}if(ch===','&&!q){out.push(cur);cur="";continue}cur+=ch}out.push(cur);return out}
+function num(v){const n=parseFloat(String(v??"").replace(/[%GBP,]/g,""));return Number.isFinite(n)?n:null}
+function money(v){return v==null?"--":"GBP "+Math.round(v).toLocaleString("en-GB")}
+function deltaMoney(v){if(v==null)return "";return (v>0?"+":"-")+money(Math.abs(v))}
+function pct(v){return v==null?"--":v.toFixed(2)+"%"}
+function monthlyPayment(rate){const n=TERM_YEARS*12,r=rate/100/12;return r===0?LOAN_AMOUNT/n:LOAN_AMOUNT*r/(1-Math.pow(1+r,-n))}
+function twoYearCost(rate,fee){return monthlyPayment(rate)*24+(fee||0)}
+function enrich(rows){return rows.map(r=>{const e={...r};for(const k of ["best_rate","halifax","natwest","barclays","lloyds","swap_2y","best_fee","best_two_year_cost","cheapest_two_year_cost"])e[k]=num(r[k]);if(e.best_two_year_cost==null&&e.best_rate!=null)e.best_two_year_cost=twoYearCost(e.best_rate,e.best_fee);e.dateObj=new Date(r.date+"T00:00:00");return e}).filter(r=>r.date&&r.best_rate!=null).sort((a,b)=>a.dateObj-b.dateObj)}
+function metric(label,value,sub="",cls=""){return `<div class="card"><div class="label">${label}</div><div class="value ${cls}">${value||"--"}</div>${sub?`<div class="sub">${sub}</div>`:""}</div>`}
+function trend(rows,days,field="best_rate"){const latest=rows.at(-1);if(!latest)return{label:"Flat",delta:0};const start=new Date(latest.dateObj);start.setDate(start.getDate()-days);const vals=rows.filter(r=>r.dateObj>=start&&r[field]!=null).map(r=>r[field]);if(vals.length<2)return{label:"Flat",delta:0};const delta=vals.at(-1)-vals[0];return{label:delta>=.05?"Rising":delta<=-.05?"Falling":"Flat",delta}}
+function bestWeek(rows){const latest=rows.at(-1);if(!latest)return null;const cutoff=new Date(latest.dateObj);cutoff.setDate(cutoff.getDate()-90);const map=new Map();for(const r of rows){if(r.dateObj<cutoff||r.dateObj>latest.dateObj)continue;const day=r.dateObj.getDay();if(day===0||day===6)continue;const monday=new Date(r.dateObj);monday.setDate(monday.getDate()-((day+6)%7));const key=monday.toISOString().slice(0,10);if(!map.has(key))map.set(key,[]);map.get(key).push(r)}const candidates=[];for(const [monday,items] of map){if(items.length<3)continue;const vals=items.map(r=>r.best_rate);const avg=vals.reduce((a,b)=>a+b,0)/vals.length;const vol=Math.max(...vals)-Math.min(...vals);if(vol<=.05)candidates.push({monday,avg,vol,items})}return candidates.sort((a,b)=>a.avg-b.avg||a.monday.localeCompare(b.monday))[0]||null}
+function lockSignal(rows){const t7=trend(rows,7),t30=trend(rows,30),latest=rows.at(-1),prev=rows.at(-2);const delta=prev?latest.best_rate-prev.best_rate:0;let label="Monitor - no urgency",score=32,reasons=[];if(delta>=.02){label="Favour locking";score=78;reasons.push(`Best rate rose ${delta.toFixed(2)}pp since prior row.`)}else if(t7.label==="Falling"&&t30.label==="Falling"){label="Wait cautiously";score=20;reasons.push("7-day and 30-day trends are both falling.")}else if(t7.label==="Rising"){label="Favour locking";score=66;reasons.push("7-day trend is rising.")}else{reasons.push(`7-day ${t7.label.toLowerCase()}, 30-day ${t30.label.toLowerCase()}.`)}return{label,score,reasons,t7,t30}}
+function drawLineChart(canvas,rows,fields){const ctx=canvas.getContext("2d"),w=canvas.width,h=canvas.height,p=46;ctx.clearRect(0,0,w,h);const vals=[];for(const f of fields)for(const r of rows){if(r[f]!=null)vals.push(r[f])}if(!vals.length)return;const min=Math.min(...vals)-.05,max=Math.max(...vals)+.05;ctx.strokeStyle="#263246";ctx.lineWidth=1;ctx.font="12px system-ui";for(let i=0;i<5;i++){const y=p+i*(h-p*2)/4;ctx.beginPath();ctx.moveTo(p,y);ctx.lineTo(w-p,y);ctx.stroke();const val=max-(i*(max-min)/4);ctx.fillStyle="#94a3b8";ctx.fillText(val.toFixed(2)+"%",8,y+4)}fields.forEach(f=>{ctx.strokeStyle=COLORS[f]||"#fff";ctx.lineWidth=f==="best_rate"?3:2;ctx.beginPath();let started=false;rows.forEach((r,i)=>{const v=r[f];if(v==null)return;const x=p+i*(w-p*2)/Math.max(rows.length-1,1),y=h-p-((v-min)/(max-min))*(h-p*2);if(!started){ctx.moveTo(x,y);started=true}else ctx.lineTo(x,y)});ctx.stroke()});fields.forEach((f,i)=>{ctx.fillStyle=COLORS[f]||"#fff";ctx.fillText(f.replace("_rate","").replace("_2y"," swap"),p+i*92,22)})}
+function drawSpread(canvas,rows){const latest=rows.at(-1);const ctx=canvas.getContext("2d"),w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);if(!latest)return;const vals=LENDERS.map(k=>({k,v:latest[k]})).filter(x=>x.v!=null);const min=Math.min(...vals.map(x=>x.v))-.02,max=Math.max(...vals.map(x=>x.v))+.02,range=Math.max(max-min,.01);vals.forEach((x,i)=>{const y=28+i*34,bw=(x.v-min)/range*(w-150);ctx.fillStyle=COLORS[x.k];ctx.fillRect(104,y,bw,18);ctx.fillStyle="#e5e7eb";ctx.font="12px system-ui";ctx.fillText(x.k,10,y+13);ctx.fillText(pct(x.v),112+bw,y+13)})}
+fetch("data/rate_history.csv").then(r=>r.text()).then(text=>{const rows=enrich(parseCSV(text));const latest=rows.at(-1),prev=rows.at(-2),best=bestWeek(rows),sig=lockSignal(rows);document.getElementById("status").textContent=`${rows.length} history rows loaded`;const delta=prev?latest.best_rate-prev.best_rate:0;const costDelta=prev&&latest.best_two_year_cost&&prev.best_two_year_cost?latest.best_two_year_cost-prev.best_two_year_cost:null;document.getElementById("cards").innerHTML=[metric("Latest best",pct(latest.best_rate),`${latest.best_lender||"Unknown"} ${delta?`(${delta>0?"+":""}${delta.toFixed(2)}pp)`:""}`,delta>0?"red":delta<0?"green":"blue"),metric("Effective 2y cost",money(latest.best_two_year_cost),costDelta==null?"rate-only estimate if fees missing":`${deltaMoney(costDelta)} vs prior row`,costDelta>0?"red":costDelta<0?"green":"blue"),metric("Halifax",pct(latest.halifax),`7-day ${sig.t7.label}`,sig.t7.label==="Rising"?"red":sig.t7.label==="Falling"?"green":"gold"),metric("2Y swap",pct(latest.swap_2y),"Latest BoE value","blue")].join("");document.getElementById("lockSignal").textContent=sig.label;document.getElementById("lockSignal").className="big "+(sig.label.includes("locking")?"red":sig.label.includes("Wait")?"green":"gold");document.getElementById("riskMeter").style.width=sig.score+"%";document.getElementById("decisionReasons").innerHTML=sig.reasons.join("<br>");document.getElementById("bestWeekSignal").textContent=best?`Lowest low-volatility week started ${best.monday} at ${best.avg.toFixed(2)}%.`:"No qualifying low-volatility week found.";drawLineChart(document.getElementById("rateChart"),rows.slice(-120),["best_rate","halifax","natwest","barclays","lloyds","swap_2y"]);drawSpread(document.getElementById("spreadChart"),rows);const bestKey=best?best.monday:null;document.getElementById("rows").innerHTML=rows.slice(-40).reverse().map(r=>{const day=r.dateObj.getDay(),m=new Date(r.dateObj);m.setDate(m.getDate()-((day+6)%7));const cls=m.toISOString().slice(0,10)===bestKey?" class=\"best-week\"":"";return `<tr${cls}><td>${r.date}</td><td>${pct(r.best_rate)}</td><td>${r.best_lender||""}</td><td>${money(r.best_two_year_cost)}</td><td>${pct(r.halifax)}</td><td>${pct(r.natwest)}</td><td>${pct(r.barclays)}</td><td>${pct(r.lloyds)}</td><td>${pct(r.swap_2y)}</td></tr>`}).join("")}).catch(e=>{document.getElementById("status").innerHTML='<span class="warn">Could not load data/rate_history.csv. Serve this folder over HTTP rather than file://.</span>';console.error(e)});
+</script>
+</body>
+</html>
