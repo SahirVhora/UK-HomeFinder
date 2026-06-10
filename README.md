@@ -18,7 +18,9 @@ Current modules:
 
 | Module | Link | Status |
 |---|---|---|
+| UK Home Intelligence Pro shell | https://sahirvhora.github.io/UK-HomeFinder/home-intelligence-pro.html | Unified front door for the merged product |
 | Command Centre / buyer tracker | https://sahirvhora.github.io/UK-HomeFinder/ | Existing HomeFinder app |
+| Area Intelligence | https://sahirvhora.github.io/UK-HomeFinder/area-intelligence.html | First migrated slice from postcode/property intelligence tools |
 | Mortgage Watch | https://sahirvhora.github.io/UK-HomeFinder/mortgage-watch.html | First migrated slice from `uk-mortgage-rate-monitor` |
 | Merge blueprint | [docs/uk-home-intelligence-pro.md](docs/uk-home-intelligence-pro.md) | Active migration plan |
 
@@ -58,7 +60,11 @@ The current `index.html` already includes:
 - Local-first browser storage
 - No account or backend requirement
 
-`mortgage-watch.html` now adds the first migrated mortgage-rate module using local committed data in `data/rate_history.csv` and `data/last_rate.json`.
+New migrated modules:
+
+- `home-intelligence-pro.html` adds the unified product shell.
+- `area-intelligence.html` adds postcode lookup, location, crime, Census ethnicity, tenure, religion, prototype area score, and a normalized `areaIntel` object.
+- `mortgage-watch.html` adds mortgage-rate history, lender spread, two-year cost, and lock/wait signal using local committed data in `data/rate_history.csv` and `data/last_rate.json`.
 
 The next consolidation work is tracked in [docs/uk-home-intelligence-pro.md](docs/uk-home-intelligence-pro.md).
 
@@ -146,24 +152,24 @@ If a backend is added later, it should be limited to API proxying, scheduled mor
 ```bash
 git clone https://github.com/SahirVhora/UK-HomeFinder.git
 cd UK-HomeFinder
-open index.html
+open home-intelligence-pro.html
 ```
 
 No server or build step is required for the current app. Some browser features and API calls behave more reliably through a local static server:
 
 ```bash
 python3 -m http.server 8000
-# open http://localhost:8000
+# open http://localhost:8000/home-intelligence-pro.html
 ```
 
 ---
 
 ## Development Priorities
 
-1. Normalise the shared data model.
-2. Add the Area Intelligence tab and migrate the postcode/census cards.
-3. Wire Mortgage Watch summary widgets into the Command Centre.
-4. Add a robust buyer decision score.
+1. Wire the migrated Area Intelligence and Mortgage Watch modules into the existing Command Centre.
+2. Add monthly-payment sensitivity using the user's budget.
+3. Add a transparent buyer decision score.
+4. Upgrade Buyer Pack export with area and mortgage evidence.
 5. Add smoke tests for critical static app flows.
 6. Add legacy banners to the old repos once this app has feature parity.
 
