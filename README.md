@@ -14,7 +14,13 @@ This repository is becoming the merged home for the UK property tools:
 | [uk-postcode-checker](https://github.com/SahirVhora/uk-postcode-checker) | Fast postcode lookup, ONS census demographics, religion, tenure, crime charts, transport overview |
 | [uk-mortgage-rate-monitor](https://github.com/SahirVhora/uk-mortgage-rate-monitor) | Mortgage-rate history, lender movement signals, lock/wait decision signal, Telegram-ready monitoring model |
 
-Launch the current app: https://sahirvhora.github.io/UK-HomeFinder/
+Current modules:
+
+| Module | Link | Status |
+|---|---|---|
+| Command Centre / buyer tracker | https://sahirvhora.github.io/UK-HomeFinder/ | Existing HomeFinder app |
+| Mortgage Watch | https://sahirvhora.github.io/UK-HomeFinder/mortgage-watch.html | First migrated slice from `uk-mortgage-rate-monitor` |
+| Merge blueprint | [docs/uk-home-intelligence-pro.md](docs/uk-home-intelligence-pro.md) | Active migration plan |
 
 ---
 
@@ -51,6 +57,8 @@ The current `index.html` already includes:
 - Buyer-pack export
 - Local-first browser storage
 - No account or backend requirement
+
+`mortgage-watch.html` now adds the first migrated mortgage-rate module using local committed data in `data/rate_history.csv` and `data/last_rate.json`.
 
 The next consolidation work is tracked in [docs/uk-home-intelligence-pro.md](docs/uk-home-intelligence-pro.md).
 
@@ -154,7 +162,7 @@ python3 -m http.server 8000
 
 1. Normalise the shared data model.
 2. Add the Area Intelligence tab and migrate the postcode/census cards.
-3. Add Mortgage Watch summary widgets to the Command Centre.
+3. Wire Mortgage Watch summary widgets into the Command Centre.
 4. Add a robust buyer decision score.
 5. Add smoke tests for critical static app flows.
 6. Add legacy banners to the old repos once this app has feature parity.
