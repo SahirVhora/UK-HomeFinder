@@ -210,6 +210,12 @@ Later integration:
 - Commit refreshed mortgage data here.
 - Generate buyer-specific mortgage watch summaries.
 
+Current implementation:
+
+- `data/rate_history.csv` copied into this repo.
+- `data/last_rate.json` copied into this repo.
+- `mortgage-watch.html` added as a static module for rate history and lock/wait signal.
+
 ### 6. Buyer Pack
 
 Purpose: create a clean decision artifact.
@@ -245,10 +251,10 @@ Upgrade:
 
 ### Phase C - Mortgage Watch
 
+- [x] Add data directory for mortgage rate history snapshot.
+- [x] Port rate parsing/enrichment helpers into `mortgage-watch.html`.
+- [x] Add lock/wait signal card.
 - [ ] Add `Mortgage Watch` nav tab or Command Centre panel.
-- [ ] Add data directory for mortgage rate history snapshot.
-- [ ] Port rate parsing/enrichment helpers.
-- [ ] Add lock/wait signal card.
 - [ ] Add monthly payment sensitivity using buyer budget.
 - [ ] Decide whether to move scheduled rate workflow into this repo.
 
@@ -291,13 +297,6 @@ Initial formula out of 100:
 
 This should be shown as a breakdown, not just one opaque number.
 
-## First Code Change After This Doc
+## Next Code Change
 
-Update `index.html` to:
-
-- Rename the header to UK Home Intelligence Pro.
-- Add nav placeholders for `Area Intelligence` and `Mortgage Watch`.
-- Add a Command Centre card summarising the merge status.
-- Keep the existing HomeFinder functionality intact.
-
-That gives the merged product a visible shell without breaking the working buyer tracker.
+Add an `area-intelligence.html` migration slice that ports the postcode-checker result model into the unified repo without yet disturbing the live `index.html` tracker.
