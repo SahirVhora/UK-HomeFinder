@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Area Intelligence - UK Home Intelligence Pro</title>
+<meta name="description" content="Postcode intelligence for UK Home Intelligence Pro: location, crime, census demographics, tenure, religion, and local signals.">
+<style>
+:root{--bg:#f7f5f0;--surface:#fff;--surface2:#f0ede6;--border:#e2ddd4;--border2:#ccc8be;--text:#1a1815;--text2:#6b6660;--text3:#9e9890;--accent:#1a5c3a;--accent2:#2d7a52;--blue:#1751a8;--blue-bg:#eef4ff;--blue-border:#b8d0f5;--warn:#8a4a00;--danger:#8b1c1c;--radius:8px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}.wrap{max-width:1180px;margin:0 auto;padding:24px}.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}h1{font-size:30px;margin:0}h2{font-size:15px;margin:0 0 10px;color:var(--text2);text-transform:uppercase;letter-spacing:.04em}.muted{color:var(--text2)}a{color:var(--blue);text-decoration:none}.actions{display:flex;gap:8px;flex-wrap:wrap}.pill{display:inline-flex;align-items:center;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 10px;color:var(--text2);font-size:13px}.search{display:flex;gap:8px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:16px}.search input{flex:1;min-width:210px;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:16px;text-transform:uppercase}.search button{background:var(--accent);color:white;border:0;border-radius:var(--radius);padding:10px 16px;font-size:15px;font-weight:700;cursor:pointer}.search button:disabled{opacity:.6;cursor:wait}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);min-height:150px}.span{grid-column:1/-1}.metric{display:flex;align-items:baseline;gap:8px;margin:8px 0}.metric strong{font-size:28px}.rows{display:grid;gap:8px}.row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--border);padding:7px 0;font-size:14px}.bar{height:9px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-top:4px}.bar span{display:block;height:100%;background:var(--accent)}.error{color:var(--danger);font-size:14px}.warn{color:var(--warn);font-size:14px}.ok{color:var(--accent);font-size:14px}.callout{border:1px solid var(--blue-border);background:var(--blue-bg);border-radius:var(--radius);padding:12px 14px;color:var(--blue);font-size:14px;margin-bottom:16px}pre{white-space:pre-wrap;word-break:break-word;background:#111;color:#eee;padding:12px;border-radius:var(--radius);font-size:12px;max-height:300px;overflow:auto}@media(max-width:780px){.wrap{padding:14px}.grid{grid-template-columns:1fr}h1{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Area Intelligence</h1>
+      <div class="muted">UK Home Intelligence Pro module for postcode evidence: location, crime, census and local risk signals.</div>
+    </div>
+    <div class="actions">
+      <a class="pill" href="./index.html">Command Centre</a>
+      <a class="pill" href="./mortgage-watch.html">Mortgage Watch</a>
+      <a class="pill" href="./docs/uk-home-intelligence-pro.md">Merge blueprint</a>
+    </div>
+  </div>
+
+  <div class="callout">This is the first migrated Area Intelligence slice from <code>uk-postcode-checker</code> and <code>PropertyPulse-UK</code>. It keeps one normalized <code>areaIntel</code> object so the main buyer tracker can later attach the same evidence to saved properties.</div>
+
+  <div class="search">
+    <input id="postcode" placeholder="e.g. B90 2DH" aria-label="UK postcode">
+    <button id="searchBtn" onclick="runAreaIntel()">Analyse postcode</button>
+    <span id="status" class="pill">Ready</span>
+  </div>
+
+  <div class="grid">
+    <section class="card" id="locationCard"><h2>Location</h2><p class="muted">Enter a postcode to begin.</p></section>
+    <section class="card" id="crimeCard"><h2>Crime</h2><p class="muted">Waiting for postcode coordinates.</p></section>
+    <section class="card" id="ethnicityCard"><h2>Ethnicity</h2><p class="muted">Waiting for LSOA.</p></section>
+    <section class="card" id="tenureCard"><h2>Housing Tenure</h2><p class="muted">Waiting for LSOA.</p></section>
+    <section class="card" id="religionCard"><h2>Religion</h2><p class="muted">Waiting for LSOA.</p></section>
+    <section class="card" id="scoreCard"><h2>Area Score</h2><p class="muted">Score appears after data loads.</p></section>
+    <section class="card span" id="objectCard"><h2>Normalized areaIntel object</h2><pre id="areaObject">{}</pre></section>
+  </div>
+</div>
+
+<script>
+const POSTCODE_REGEX=/^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i;
+let areaIntel=null;
+function esc(value){return String(value??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]))}
+function normalisePostcode(raw){return String(raw||"").trim().toUpperCase().replace(/\s+/g,"")}
+function displayPostcode(raw){const pc=normalisePostcode(raw);return pc.length>3?pc.slice(0,-3)+" "+pc.slice(-3):pc}
+function setStatus(text){document.getElementById("status").textContent=text}
+function setLoading(){["locationCard","crimeCard","ethnicityCard","tenureCard","religionCard","scoreCard"].forEach(id=>{const title=document.querySelector(`#${id} h2`)?.textContent||"Loading";document.getElementById(id).innerHTML=`<h2>${title}</h2><p class="muted">Loading...</p>`})}
+function renderRows(items,total){if(!items?.length)return '<p class="warn">No data returned.</p>';const max=Math.max(...items.map(i=>i.value||0),1);return `<div class="rows">${items.map(i=>`<div><div class="row"><span>${esc(i.label)}</span><strong>${Number(i.value||0).toLocaleString("en-GB")}</strong></div><div class="bar"><span style="width:${Math.max(3,(i.value||0)/max*100)}%"></span></div>${total?`<div class="muted" style="font-size:12px">${(((i.value||0)/total)*100).toFixed(1)}%</div>`:""}</div>`).join("")}</div>`}
+async function fetchJson(url){const res=await fetch(url);if(!res.ok)throw new Error(`${res.status} ${res.statusText}`);return res.json()}
+async function runAreaIntel(){const input=document.getElementById("postcode");const pc=normalisePostcode(input.value);if(!POSTCODE_REGEX.test(pc)){setStatus("Invalid postcode");document.getElementById("locationCard").innerHTML='<h2>Location</h2><p class="error">Enter a valid UK postcode, for example B90 2DH.</p>';return}document.getElementById("searchBtn").disabled=true;setStatus("Loading");setLoading();areaIntel={postcode:displayPostcode(pc),location:{lat:null,lon:null,ward:"",district:"",region:"",lsoa:""},crime:{latestMonth:"",total:null,categories:[]},census:{ethnicity:[],tenure:[],religion:[]},score:{overall:null,safety:null,demographics:null},fetchedAt:new Date().toISOString(),errors:[]};try{const loc=await fetchLocation(pc);areaIntel.location=loc;renderLocation(loc);await Promise.allSettled([fetchCrime(loc),fetchEthnicity(loc.lsoa),fetchTenure(loc.lsoa),fetchReligion(loc.lsoa)]).then(results=>{results.forEach(r=>{if(r.status==="rejected")areaIntel.errors.push(r.reason?.message||String(r.reason))})});scoreArea();renderObject();setStatus("Complete")}catch(err){areaIntel.errors.push(err.message);document.getElementById("locationCard").innerHTML=`<h2>Location</h2><p class="error">${esc(err.message)}</p>`;setStatus("Error")}finally{document.getElementById("searchBtn").disabled=false;renderObject()}}
+async function fetchLocation(pc){const data=await fetchJson(`https://api.postcodes.io/postcodes/${encodeURIComponent(pc)}`);const r=data.result;if(!r)throw new Error("Postcode not found");return{lat:r.latitude,lon:r.longitude,ward:r.admin_ward||"",district:r.admin_district||"",region:r.region||"",lsoa:r.codes?.lsoa||r.lsoa||"",parliamentaryConstituency:r.parliamentary_constituency||""}}
+function renderLocation(loc){document.getElementById("locationCard").innerHTML=`<h2>Location</h2><div class="rows"><div class="row"><span>Postcode</span><strong>${esc(areaIntel.postcode)}</strong></div><div class="row"><span>Ward</span><strong>${esc(loc.ward)}</strong></div><div class="row"><span>District</span><strong>${esc(loc.district)}</strong></div><div class="row"><span>Region</span><strong>${esc(loc.region)}</strong></div><div class="row"><span>LSOA</span><strong>${esc(loc.lsoa)}</strong></div></div>`}
+function latestPoliceMonth(){const d=new Date();d.setMonth(d.getMonth()-2);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`}
+async function fetchCrime(loc){try{const month=latestPoliceMonth();const crimes=await fetchJson(`https://data.police.uk/api/crimes-street/all-crime?lat=${loc.lat}&lng=${loc.lon}&date=${month}`);const counts={};crimes.forEach(c=>{counts[c.category]=(counts[c.category]||0)+1});const categories=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([label,value])=>({label:pretty(label),value}));areaIntel.crime={latestMonth:month,total:crimes.length,categories};document.getElementById("crimeCard").innerHTML=`<h2>Crime</h2><div class="metric"><strong>${crimes.length}</strong><span class="muted">street-level incidents in ${esc(month)}</span></div>${renderRows(categories.slice(0,8),crimes.length)}`}catch(err){document.getElementById("crimeCard").innerHTML=`<h2>Crime</h2><p class="error">Crime data unavailable: ${esc(err.message)}</p>`;throw err}}
+function pretty(s){return String(s||"").split("-").map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(" ")}
+async function fetchNomis(lsoa,dataset,dimension,codes,select){if(!lsoa)throw new Error("No LSOA code available");const url=`https://www.nomisweb.co.uk/api/v01/dataset/${dataset}.data.json?geography=${encodeURIComponent(lsoa)}&${dimension}=${codes}&measures=20100&select=${select},obs_value`;const data=await fetchJson(url);return data.obs||[]}
+async function fetchEthnicity(lsoa){try{const obs=await fetchNomis(lsoa,"NM_2041_1","C2021_ETH_20",Array.from({length:19},(_,i)=>i+1).join(","),"C2021_ETH_20_name");const rows=obs.map(o=>({label:shortEth(o.c2021_eth_20?.description),value:o.obs_value?.value||0})).sort((a,b)=>b.value-a.value).slice(0,10);areaIntel.census.ethnicity=rows;const total=rows.reduce((s,r)=>s+r.value,0);document.getElementById("ethnicityCard").innerHTML=`<h2>Ethnicity</h2><p class="muted">Census 2021 LSOA summary</p>${renderRows(rows,total)}`}catch(err){document.getElementById("ethnicityCard").innerHTML=`<h2>Ethnicity</h2><p class="error">Ethnicity data unavailable: ${esc(err.message)}</p>`;throw err}}
+async function fetchTenure(lsoa){try{const obs=await fetchNomis(lsoa,"NM_2072_1","C2021_TENURE_9","1,2,3,4,5,6,7,8","C2021_TENURE_9_name");const rows=obs.map(o=>({label:shortTenure(o.c2021_tenure_9?.description),value:o.obs_value?.value||0})).sort((a,b)=>b.value-a.value);areaIntel.census.tenure=rows;const total=rows.reduce((s,r)=>s+r.value,0);document.getElementById("tenureCard").innerHTML=`<h2>Housing Tenure</h2><p class="muted">Census 2021 household summary</p>${renderRows(rows,total)}`}catch(err){document.getElementById("tenureCard").innerHTML=`<h2>Housing Tenure</h2><p class="error">Tenure data unavailable: ${esc(err.message)}</p>`;throw err}}
+async function fetchReligion(lsoa){try{const obs=await fetchNomis(lsoa,"NM_2049_1","C2021_RELIGION_10","1,2,3,4,5,6,7,8,9","C2021_RELIGION_10_name");const rows=obs.map(o=>({label:o.c2021_religion_10?.description||"Unknown",value:o.obs_value?.value||0})).sort((a,b)=>b.value-a.value);areaIntel.census.religion=rows;const total=rows.reduce((s,r)=>s+r.value,0);document.getElementById("religionCard").innerHTML=`<h2>Religion</h2><p class="muted">Census 2021 LSOA summary</p>${renderRows(rows,total)}`}catch(err){document.getElementById("religionCard").innerHTML=`<h2>Religion</h2><p class="error">Religion data unavailable: ${esc(err.message)}</p>`;throw err}}
+function shortEth(label=""){return label.replace(/^Asian, Asian British or Asian Welsh: /,"").replace(/^White: English, Welsh, Scottish, Northern Irish or British$/, "White: British").replace(/^Black, Black British, Black Welsh, Caribbean or African: /,"Black: ").replace(/^Mixed or Multiple ethnic groups: /,"Mixed: ")}
+function shortTenure(label=""){return label.replace("Owned: Owns outright","Owned outright").replace("Owned: Owns with a mortgage or loan","Owned with mortgage").replace("Social rented: Rents from council or Local Authority","Social rented council").replace("Social rented: Other social rented","Social rented other").replace("Private rented: Private landlord or letting agency","Private rented")}
+function scoreArea(){const crimeTotal=areaIntel.crime.total;let safety=crimeTotal==null?null:crimeTotal<=50?90:crimeTotal<=100?75:crimeTotal<=180?55:35;const dataCompleteness=[areaIntel.crime.categories.length,areaIntel.census.ethnicity.length,areaIntel.census.tenure.length,areaIntel.census.religion.length].filter(Boolean).length;const demographics=dataCompleteness/4*100;const overall=Math.round(((safety??60)*0.55)+(demographics*0.45));areaIntel.score={overall,safety,demographics:Math.round(demographics)};document.getElementById("scoreCard").innerHTML=`<h2>Area Score</h2><div class="metric"><strong>${overall}</strong><span class="muted">/ 100 evidence score</span></div><div class="rows"><div class="row"><span>Safety signal</span><strong>${safety??"n/a"}</strong></div><div class="row"><span>Data completeness</span><strong>${Math.round(demographics)}%</strong></div></div><p class="muted" style="font-size:13px;margin-top:10px">Prototype score for comparison only. It should not replace visits, local council checks, lender advice or conveyancing due diligence.</p>`}
+function renderObject(){document.getElementById("areaObject").textContent=JSON.stringify(areaIntel||{},null,2)}
+document.getElementById("postcode").addEventListener("keydown",e=>{if(e.key==="Enter")runAreaIntel()});
+</script>
+</body>
+</html>
