@@ -1,6 +1,8 @@
-.DS_Store
-Thumbs.db
-.vscode/
-node_modules/
-.env
-*.log
+1|.DS_Store
+2|Thumbs.db
+3|.vscode/
+4|node_modules/
+5|.env
+6|*.log
+7|
+__pycache__/

@@ -325,7 +325,7 @@ textarea{resize:vertical;min-height:70px}
     <div>
       <div class="card" style="margin-bottom:1rem">
         <div class="card-title">SDLT Quick Calculator</div>
-        <div class="alert alert-info" id="sdlt-rule-notice">April 2025: FTB gets 0% up to £300k · 5% on £300k–£500k · standard above £500k</div>
+        <div class="alert alert-info" id="sdlt-rule-notice">April 2025: FTB gets 0% up to £300k · 5% on £300k-£500k · standard above £500k</div>
         <div class="form-row"><label>Property price (£)</label><input type="number" id="sdlt-price" placeholder="480000" oninput="calcSDLT()"></div>
         <div id="sdlt-result"></div>
       </div>
@@ -414,7 +414,7 @@ textarea{resize:vertical;min-height:70px}
     </div>
   </div>
   <div id="ptab-score" style="display:none">
-    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Rate 0–10. School quality and transport now auto-filled from area data when available.</p>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Rate 0-10. School quality and transport now auto-filled from area data when available.</p>
     <div id="score-sliders"></div>
     <div class="sdlt-result" style="margin-top:1rem">
       <div class="flex-between"><span style="font-size:14px;font-weight:600">Composite score</span><span style="font-size:22px;font-weight:700;color:var(--accent)" id="composite-score">0</span></div>
@@ -514,14 +514,14 @@ const CHECKLIST_SECTIONS=[
     {id:'school-timeline',text:'Confirmed school admission year timeline for your child'},
   ]},
   {title:'Legal & Solicitor',items:[
-    {id:'solicitor-shortlist',text:'Shortlisted 2–3 conveyancing solicitors',meta:'Proactive solicitor makes a huge difference'},
+    {id:'solicitor-shortlist',text:'Shortlisted 2-3 conveyancing solicitors',meta:'Proactive solicitor makes a huge difference'},
     {id:'solicitor-instructed',text:'Solicitor pre-instructed (ready on acceptance)'},
     {id:'id-docs',text:'ID documents compiled (passport, utility bills)',meta:'AML checks required by solicitor'},
   ]},
   {title:'Property Research',items:[
     {id:'land-registry',text:'Land Registry sold prices checked on target streets'},
     {id:'survey-type',text:'Decided on survey type (HomeBuyers vs Full Structural)'},
-    {id:'surveyor-quotes',text:'Got surveyor quotes',meta:'£500–£800 HomeBuyers; £900–£1,500 Full Structural'},
+    {id:'surveyor-quotes',text:'Got surveyor quotes',meta:'£500-£800 HomeBuyers; £900-£1,500 Full Structural'},
     {id:'flood-check',text:'Flood risk checked (gov.uk flood map)'},
     {id:'epc-check',text:'EPC rating checked (gov.uk energy certificate)'},
   ]},
@@ -989,7 +989,7 @@ function haversine(lat1,lon1,lat2,lon2){
 function computeIntelScore(schools,transport,postcode,lat,lon,district,region,sr,tr,br){
   const{stations,busstops}=transport;
 
-  // School score (0–10)
+  // School score (0-10)
   // Proxy: number of schools found, closeness, type mix
   // Since Ofsted ratings no longer in GIAS directly, score is based on:
   // - how many schools within radius (density = good catchment area)
@@ -1006,7 +1006,7 @@ function computeIntelScore(schools,transport,postcode,lat,lon,district,region,sr
   if(nearestSchool<0.5)schoolScore=Math.min(10,schoolScore+1);
   else if(nearestSchool>1.5)schoolScore=Math.max(0,schoolScore-1);
 
-  // Transport score (0–10)
+  // Transport score (0-10)
   const numStations=stations.length;
   const nearestStation=numStations>0?stations[0].dist:99;
   const numBuses=busstops.length;
@@ -1155,7 +1155,7 @@ function calcSDLTForAmount(price,ftb=true){
       if(p<=lo)break;
       const top=Math.min(p,hi===Infinity?p:hi);
       const chunk=(top-lo)*rate;
-      if(rate>0||bkd.length===0)bkd.push({band:`£${lo.toLocaleString()}–${hi===Infinity?'above':('£'+top.toLocaleString())}`,rate:`${(rate*100).toFixed(0)}%`,amount:chunk});
+      if(rate>0||bkd.length===0)bkd.push({band:`£${lo.toLocaleString()}-${hi===Infinity?'above':('£'+top.toLocaleString())}`,rate:`${(rate*100).toFixed(0)}%`,amount:chunk});
       tax+=chunk;
     }
     return{tax,breakdown:bkd};
@@ -1164,7 +1164,7 @@ function calcSDLTForAmount(price,ftb=true){
     if(price<=SDLT.ftbFreeThreshold)return{tax:0,breakdown:[{band:`Up to £${SDLT.ftbFreeThreshold.toLocaleString()}`,rate:'0% (FTB)',amount:0}]};
     if(price<=SDLT.ftbReliefCeiling){
       const tax=(price-SDLT.ftbFreeThreshold)*SDLT.ftbTopRate;
-      return{tax,breakdown:[{band:`£0–£${SDLT.ftbFreeThreshold.toLocaleString()}`,rate:'0% (FTB)',amount:0},{band:`£${SDLT.ftbFreeThreshold.toLocaleString()}–£${price.toLocaleString()}`,rate:`${(SDLT.ftbTopRate*100).toFixed(0)}%`,amount:tax}]};
+      return{tax,breakdown:[{band:`£0-£${SDLT.ftbFreeThreshold.toLocaleString()}`,rate:'0% (FTB)',amount:0},{band:`£${SDLT.ftbFreeThreshold.toLocaleString()}-£${price.toLocaleString()}`,rate:`${(SDLT.ftbTopRate*100).toFixed(0)}%`,amount:tax}]};
     }
     // Above ftbReliefCeiling - FTB relief fully withdrawn, use standard rates
     return applySlabs(price,SDLT.standard);
@@ -1603,7 +1603,7 @@ function renderOverview(){
   const actions=[];
   if(!data.checklist['aip'])actions.push({text:'Get your Mortgage in Principle (AIP)',p:'high'});
   if(!data.checklist['schools-checked'])actions.push({text:'Run area intelligence for target postcodes - check school quality',p:'high'});
-  if(!data.checklist['solicitor-shortlist'])actions.push({text:'Shortlist 2–3 conveyancing solicitors',p:'medium'});
+  if(!data.checklist['solicitor-shortlist'])actions.push({text:'Shortlist 2-3 conveyancing solicitors',p:'medium'});
   if(!propsCount)actions.push({text:'Add first property - paste a Rightmove URL in the Parser tab',p:'medium'});
   if(!data.budget.maxprice)actions.push({text:'Set your budget in the Budget & SDLT tab',p:'medium'});
   if(!actions.length)actions.push({text:'All key tasks complete - ready to move fast on the right property!',p:'done'});
