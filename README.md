@@ -3,13 +3,12 @@
 **Property comparison tracker, SDLT calculator, and readiness checklist for active UK home buyers.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Toolkit](https://img.shields.io/badge/part%20of-UK%20Property%20Toolkit-blue)](https://github.com/SahirVhora?tab=repositories&q=uk-property+OR+PropertyPulse+OR+HomeFinder+OR+postcode-checker)
+[![Toolkit](https://img.shields.io/badge/part%20of-UK%20Property%20Toolkit-blue)](https://github.com/SahirVhora?tab=repositories&q=uk-property+OR+HomeFinder+OR+postcode-checker)
 
-Part of the **[UK Property Toolkit](https://github.com/SahirVhora?tab=repositories&q=uk-property+OR+PropertyPulse+OR+HomeFinder+OR+postcode-checker)** - three free tools for UK home buyers.
+Part of the **[UK Property Toolkit](https://github.com/SahirVhora?tab=repositories&q=uk-property+OR+HomeFinder+OR+postcode-checker)** - focused free tools for UK home buyers.
 
 | Tool | Purpose | Best For |
 |---|---|---|
-| [PropertyPulse-UK](https://github.com/SahirVhora/PropertyPulse-UK) | Postcode intelligence + scoring + map | Deep area research |
 | **UK-HomeFinder** ← you are here | Property tracking + SDLT + checklist | Active buyers comparing properties |
 | [uk-postcode-checker](https://github.com/SahirVhora/uk-postcode-checker) | Quick demographic lookup | Fast postcode overview |
 
@@ -108,7 +107,6 @@ No server, no build step. Data saved to localStorage - nothing sent to any serve
 
 ## 🔗 Also in the UK Property Toolkit
 
-- **[PropertyPulse-UK](https://github.com/SahirVhora/PropertyPulse-UK)** - Deep area intelligence: crime trends, flood risk, air quality, schools, composite scoring with interactive map
 - **[uk-postcode-checker](https://github.com/SahirVhora/uk-postcode-checker)** - Fast demographics: census charts (ethnicity, religion, tenure), crime stats, schools, transport
 
 ---
