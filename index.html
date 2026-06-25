@@ -216,6 +216,7 @@ textarea{resize:vertical;min-height:70px}
   <button onclick="showSection('budget')">Budget & SDLT</button>
   <button onclick="showSection('checklist')">Readiness</button>
   <button onclick="showSection('map')">Map View</button>
+  <button onclick="showSection('pricepaid')">Sold Prices</button>
 </nav>
 
 <main>
@@ -375,6 +376,56 @@ textarea{resize:vertical;min-height:70px}
   <div id="map-container" style="height:520px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:1.5rem;background:var(--surface2)"></div>
   <div id="map-legend" style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text2);margin-bottom:1rem"></div>
   <div id="map-props-summary"></div>
+</div>
+
+<!-- ═══ SOLD PRICES ═══ -->
+<div id="section-pricepaid" class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Sold Prices (Land Registry)</div>
+      <div class="section-sub">Recent property sales from HM Land Registry Price Paid Data</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="form-row-2">
+      <div>
+        <label for="pp-postcode">Postcode</label>
+        <input type="text" id="pp-postcode" placeholder="e.g. B90 3AA or B90" value="B90">
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <button class="btn btn-info" onclick="searchPricePaid()" style="width:100%">Search</button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-top:-4px">
+      Enter a full postcode (B90 3AA) for exact matches, or an outcode (B90) for area stats. Powered by HM Land Registry open data.
+    </div>
+  </div>
+  <div id="pp-results" style="display:none;margin-top:1rem"></div>
+  <div id="pp-stats" style="display:none;margin-top:1rem"></div>
+  <div id="pp-loading" style="display:none;text-align:center;padding:2rem;color:var(--text3)">
+    <div style="font-size:32px;margin-bottom:8px">🔍</div>
+    <div>Searching sold prices...</div>
+  </div>
+  <div id="pp-error" style="display:none" class="card" style="background:var(--danger-bg);border-color:var(--danger-border);color:var(--danger)"></div>
+  <div id="pp-fallback" style="display:none;margin-top:1rem">
+    <div class="card" style="background:var(--info-bg);border-color:var(--blue-border)">
+      <div style="font-size:14px;font-weight:600;color:var(--info);margin-bottom:8px">💡 Local Price Data Service</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6">
+        Sold prices require the <strong>house_hunter_uk</strong> local service to be running.
+        <br><br>
+        To enable, run this in your terminal:
+        <div style="background:#1a1a2e;color:#e0e0e0;padding:12px 16px;border-radius:8px;margin:10px 0;font-family:monospace;font-size:13px">
+          cd ~/projects/uk-property/house_hunter_uk<br>
+          PYTHONPATH=.. python3 -m house_hunter_uk.__main__ serve-web --port 8080
+        </div>
+        Then download the price data first:
+        <div style="background:#1a1a2e;color:#e0e0e0;padding:12px 16px;border-radius:8px;margin:10px 0;font-family:monospace;font-size:13px">
+          PYTHONPATH=.. python3 -m house_hunter_uk.__main__ price-paid-download --year 2026
+        </div>
+        <a href="https://landregistry.data.gov.uk/" target="_blank" style="color:var(--blue)">HM Land Registry Open Data →</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 </main>
@@ -568,9 +619,10 @@ function showSection(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('section-'+id).classList.add('active');
-  const labels={overview:'Overview',parser:'Rightmove Parser',properties:'My Properties',budget:'Budget & SDLT',checklist:'Readiness',map:'Map View'};
+  const labels={overview:'Overview',parser:'Rightmove Parser',properties:'My Properties',budget:'Budget & SDLT',checklist:'Readiness',map:'Map View',pricepaid:'Sold Prices'};
   [...document.querySelectorAll('nav button')].find(b=>b.textContent.trim()===labels[id])?.classList.add('active');
   if(id==='map')renderMap();
+  else if(id==='pricepaid')showPricePaidFallback();
   else renderAll();
 }
 
@@ -580,6 +632,107 @@ function renderAll(){
   renderPropertiesList();
   restoreBudget();
   renderSDLTComparison();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SOLD PRICES (Land Registry Price Paid Data)
+// ═══════════════════════════════════════════════════════════
+const PRICE_API_BASE = 'http://localhost:8080';
+
+function showPricePaidFallback(){
+  document.getElementById('pp-fallback').style.display='block';
+  document.getElementById('pp-results').style.display='none';
+  document.getElementById('pp-stats').style.display='none';
+  document.getElementById('pp-error').style.display='none';
+  document.getElementById('pp-loading').style.display='none';
+}
+
+function searchPricePaid(){
+  const pc=document.getElementById('pp-postcode').value.trim().toUpperCase();
+  if(!pc){alert('Enter a postcode');return;}
+  document.getElementById('pp-loading').style.display='block';
+  document.getElementById('pp-results').style.display='none';
+  document.getElementById('pp-stats').style.display='none';
+  document.getElementById('pp-error').style.display='none';
+  document.getElementById('pp-fallback').style.display='none';
+
+  fetch(PRICE_API_BASE+'/api/price-paid?postcode='+encodeURIComponent(pc)+'&limit=20')
+    .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+    .then(data=>{
+      document.getElementById('pp-loading').style.display='none';
+      if(!data.ok){showPPError(data.error||'Service error');return;}
+      renderPPSales(data);
+      if(data.stats)renderPPStats(data.stats);
+    })
+    .catch(err=>{
+      document.getElementById('pp-loading').style.display='none';
+      document.getElementById('pp-fallback').style.display='block';
+    });
+}
+
+function renderPPSales(data){
+  const el=document.getElementById('pp-results');
+  const sales=data.sales||[];
+  if(!sales.length){
+    el.innerHTML='<div class="card" style="text-align:center;color:var(--text3)">No sales found for "'+data.postcode+'" in 2026 data.</div>';
+    el.style.display='block';
+    return;
+  }
+  const typeLabel={'D':'Detached','S':'Semi-detached','T':'Terraced','F':'Flat','O':'Other'};
+  let rows='';
+  sales.forEach(s=>{
+    const t=s.property_type?typeLabel[s.property_type]||s.property_type:'';
+    const addr=[s.paon,s.street,s.town].filter(Boolean).join(' ');
+    rows+=`<tr>
+      <td style="padding:10px 8px;border-bottom:1px solid var(--border);font-weight:600;white-space:nowrap">£${Number(s.price).toLocaleString()}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid var(--border);white-space:nowrap">${(s.transfer_date||'').slice(0,10)}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid var(--border)">${t}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid var(--border)">${s.postcode}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid var(--border);color:var(--text2)">${addr}</td>
+    </tr>`;
+  });
+  el.innerHTML=`
+    <div class="card" style="padding:0;overflow-x:auto">
+      <table style="width:100%;font-size:13px;border-collapse:collapse">
+        <thead>
+          <tr style="background:var(--surface2)">
+            <th style="padding:10px 8px;text-align:left;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border)">Price</th>
+            <th style="padding:10px 8px;text-align:left;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border)">Date</th>
+            <th style="padding:10px 8px;text-align:left;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border)">Type</th>
+            <th style="padding:10px 8px;text-align:left;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border)">Postcode</th>
+            <th style="padding:10px 8px;text-align:left;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border)">Address</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-top:8px;text-align:right">${sales.length} sale(s) found</div>
+  `;
+  el.style.display='block';
+}
+
+function renderPPStats(stats){
+  const el=document.getElementById('pp-stats');
+  if(!stats||!stats.total_sales){el.style.display='none';return;}
+  el.innerHTML=`
+    <div class="card">
+      <div class="card-title">Area Stats: ${document.getElementById('pp-postcode').value.trim().toUpperCase()}</div>
+      <div class="grid-4">
+        <div class="stat-card"><div class="stat-label">Total Sales</div><div class="stat-value">${stats.total_sales}</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Price</div><div class="stat-value">£${Number(stats.avg_price).toLocaleString()}</div></div>
+        <div class="stat-card"><div class="stat-label">Min Price</div><div class="stat-value">£${Number(stats.min_price).toLocaleString()}</div></div>
+        <div class="stat-card"><div class="stat-label">Max Price</div><div class="stat-value">£${Number(stats.max_price).toLocaleString()}</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-top:8px">Date range: ${stats.earliest_sale||'N/A'} to ${stats.latest_sale||'N/A'}</div>
+    </div>
+  `;
+  el.style.display='block';
+}
+
+function showPPError(msg){
+  const el=document.getElementById('pp-error');
+  el.textContent=msg;
+  el.style.display='block';
 }
 
 // ═══════════════════════════════════════════════════════════
