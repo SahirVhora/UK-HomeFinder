@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UK Stamp Duty Calculator 2026 & Home Finder Hub</title>
-<meta name="description" content="Free UK Stamp Duty (SDLT) calculator 2026, affordability calculator, and property search dashboard. Find your next home and calculate all costs in one place.">
-<meta property="og:title" content="UK HomeFinder - Stamp Duty Calculator & Property Search">
-<meta property="og:description" content="Free UK Stamp Duty (SDLT) calculator 2026, affordability calculator, and property search dashboard. Find your next home and calculate all costs in one place.">
+    <title>UK Home Intelligence Pro | Property, Area & Mortgage Hub</title>
+<meta name="description" content="UK Home Intelligence Pro: free buyer-intelligence hub for UK property research. Stamp duty, affordability, area intel, sold prices, and property tracking in one place.">
+<meta property="og:title" content="UK Home Intelligence Pro | Property, Area & Mortgage Hub">
+<meta property="og:description" content="UK Home Intelligence Pro: free buyer-intelligence hub for UK property research. Stamp duty, affordability, area intel, sold prices, and property tracking in one place.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sahirvhora.github.io/UK-HomeFinder/">
 <link rel="canonical" href="https://sahirvhora.github.io/UK-HomeFinder/">
@@ -16,6 +16,8 @@
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="UK Home Intelligence Pro | Property, Area & Mortgage Hub">
+<meta name="twitter:description" content="UK Home Intelligence Pro: free buyer-intelligence hub for UK property research. Stamp duty, affordability, area intel, sold prices, and property tracking in one place.">
 <meta name="twitter:image" content="https://sahirvhora.github.io/UK-HomeFinder/preview.svg">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -202,7 +204,7 @@ textarea{resize:vertical;min-height:70px}
 <body>
 
 <header>
-  <div class="logo">UK Home Finder Hub <span>Schools · Transport · SDLT · Property Tracker</span></div>
+  <div class="logo">UK Home Intelligence Pro <span>Property · Area · Mortgage</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <button class="btn btn-ghost btn-sm" id="theme-toggle" onclick="toggleTheme()" style="color:#fff;border-color:rgba(255,255,255,.3)" aria-label="Toggle dark mode">🌙</button>
     <button class="btn btn-ghost btn-sm" onclick="openSettings()" style="color:#fff;border-color:rgba(255,255,255,.3)">⚙ Settings</button>
@@ -211,7 +213,7 @@ textarea{resize:vertical;min-height:70px}
 
 <nav>
   <button class="active" onclick="showSection('overview')">Overview</button>
-  <button onclick="showSection('parser')">Rightmove Parser</button>
+  <button onclick="showSection('parser')">Property Search</button>
   <button onclick="showSection('properties')">My Properties</button>
   <button onclick="showSection('budget')">Budget & SDLT</button>
   <button onclick="showSection('checklist')">Readiness</button>
@@ -619,7 +621,7 @@ function showSection(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('section-'+id).classList.add('active');
-  const labels={overview:'Overview',parser:'Rightmove Parser',properties:'My Properties',budget:'Budget & SDLT',checklist:'Readiness',map:'Map View',pricepaid:'Sold Prices'};
+  const labels={overview:'Overview',parser:'Property Search',properties:'My Properties',budget:'Budget & SDLT',checklist:'Readiness',map:'Map View',pricepaid:'Sold Prices'};
   [...document.querySelectorAll('nav button')].find(b=>b.textContent.trim()===labels[id])?.classList.add('active');
   if(id==='map')renderMap();
   else if(id==='pricepaid')showPricePaidFallback();
