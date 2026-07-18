@@ -6,8 +6,3 @@
 6|*.log
 7|
 __pycache__/
-
-.audit-result.json
-.claude/settings.local.json
-.under-anything/
-.DS_Store
