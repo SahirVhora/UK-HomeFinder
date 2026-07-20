@@ -17,6 +17,8 @@
 <meta property="og:image:height" content="640">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://sahirvhora.github.io/UK-HomeFinder/preview.svg">
+<!-- Leave empty for GitHub Pages. Self-hosted deployments may configure an HTTPS sold-price backend. -->
+<meta name="price-api-base" content="">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -409,19 +411,11 @@ textarea{resize:vertical;min-height:70px}
   <div id="pp-error" style="display:none" class="card" style="background:var(--danger-bg);border-color:var(--danger-border);color:var(--danger)"></div>
   <div id="pp-fallback" style="display:none;margin-top:1rem">
     <div class="card" style="background:var(--info-bg);border-color:var(--blue-border)">
-      <div style="font-size:14px;font-weight:600;color:var(--info);margin-bottom:8px">💡 Local Price Data Service</div>
+      <div style="font-size:14px;font-weight:600;color:var(--info);margin-bottom:8px">💡 Sold price data</div>
       <div style="font-size:13px;color:var(--text2);line-height:1.6">
-        Sold prices require the <strong>house_hunter_uk</strong> local service to be running.
+        Sold-price search is unavailable on this public site because no backend service is configured.
+        You can still search the official HM Land Registry open-data service directly:
         <br><br>
-        To enable, run this in your terminal:
-        <div style="background:#1a1a2e;color:#e0e0e0;padding:12px 16px;border-radius:8px;margin:10px 0;font-family:monospace;font-size:13px">
-          cd ~/projects/uk-property/house_hunter_uk<br>
-          PYTHONPATH=.. python3 -m house_hunter_uk.__main__ serve-web --port 8080
-        </div>
-        Then download the price data first:
-        <div style="background:#1a1a2e;color:#e0e0e0;padding:12px 16px;border-radius:8px;margin:10px 0;font-family:monospace;font-size:13px">
-          PYTHONPATH=.. python3 -m house_hunter_uk.__main__ price-paid-download --year 2026
-        </div>
         <a href="https://landregistry.data.gov.uk/" target="_blank" style="color:var(--blue)">HM Land Registry Open Data →</a>
       </div>
     </div>
@@ -637,7 +631,11 @@ function renderAll(){
 // ═══════════════════════════════════════════════════════════
 // SOLD PRICES (Land Registry Price Paid Data)
 // ═══════════════════════════════════════════════════════════
-const PRICE_API_BASE = 'http://localhost:8080';
+const PRICE_API_BASE = document.querySelector('meta[name="price-api-base"]')?.content.trim().replace(/\/+$/, '') || '';
+
+function isConfiguredPriceApi(){
+  return /^https:\/\//i.test(PRICE_API_BASE);
+}
 
 function showPricePaidFallback(){
   document.getElementById('pp-fallback').style.display='block';
@@ -650,6 +648,10 @@ function showPricePaidFallback(){
 function searchPricePaid(){
   const pc=document.getElementById('pp-postcode').value.trim().toUpperCase();
   if(!pc){alert('Enter a postcode');return;}
+  if(!isConfiguredPriceApi()){
+    showPricePaidFallback();
+    return;
+  }
   document.getElementById('pp-loading').style.display='block';
   document.getElementById('pp-results').style.display='none';
   document.getElementById('pp-stats').style.display='none';
